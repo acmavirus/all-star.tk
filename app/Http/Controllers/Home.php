@@ -23,19 +23,19 @@ class Home extends CoreController
 
     public function index(Request $request)
     {
-        $page = $request['page'];
-        $limit = !empty($request['perpage']) && $request['perpage'] > 0 ? $request['perpage'] : 18;
-        $data = [];
-        $offset = ($page = 1) ? 0 : $page * $limit;
-        $data['newest'] = DB::table('st_post')
-            ->limit($limit)
-            ->offset($offset)
-            ->get();
-        $data['popular'] = DB::table('st_post')
-            ->inRandomOrder()
-            ->limit(6)
-            ->get();
-        $data['main_content'] = view("default.home.index", $data)->render();
-        return view('default.layout', $data);
+        // $page = $request['page'];
+        // $limit = !empty($request['perpage']) && $request['perpage'] > 0 ? $request['perpage'] : 18;
+        // $data = [];
+        // $offset = ($page = 1) ? 0 : $page * $limit;
+        // $data['newest'] = DB::table('st_post')
+        //     ->limit($limit)
+        //     ->offset($offset)
+        //     ->get();
+        // $data['popular'] = DB::table('st_post')
+        //     ->inRandomOrder()
+        //     ->limit(6)
+        //     ->get();
+        // $data['main_content'] = view("default.home.index", $data)->render();
+        return view('welcome', []);
     }
 }

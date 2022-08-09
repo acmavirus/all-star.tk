@@ -17,7 +17,19 @@ $(function() {
     }, {
         field: "title",
         title: "Tiêu đề",
-        width: 300
+        width: 200
+    }, {
+        field: "is_robot",
+        title: "Robot Index",
+        textAlign: "center",
+        width: 150,
+        template: function (t) {
+            var e = {
+                0: {title: "NoIndex, NoFollow", class: "m-badge--danger"},
+                1: {title: "Index, Follow", class: "m-badge--success"},
+            };
+            return '<span data-field="is_robot" data-value="'+(t.is_robot == 1 ? 0 : 1)+'" class="m-badge ' + e[t.is_robot].class + ' m-badge--wide btnUpdateField">' + e[t.is_robot].title + "</span>"
+        }
     }, {
         field: "is_status",
         title: "Status",
@@ -31,31 +43,25 @@ $(function() {
             return '<span data-field="is_status" data-value="'+(t.is_status == 1 ? 0 : 1)+'" class="m-badge ' + e[t.is_status].class + ' m-badge--wide btnUpdateField">' + e[t.is_status].title + "</span>"
         }
     }, {
-        field: "updated_time",
-        title: "Updated Time",
-        type: "date",
-        textAlign: "center",
-        format: "MM/DD/YYYY"
-    }, {
-        field: "created_time",
-        title: "Created Time",
-        type: "date",
-        textAlign: "center",
-        format: "MM/DD/YYYY"
-    }, {
         field: "action",
-        width: 110,
+        width: 250,
         title: "Actions",
         sortable: !1,
         overflow: "visible",
         template: function (t, e, a) {
-            return '' +
-                '<a href="javascript:;" class="m-portlet__nav-link btn m-btn m-btn--hover-accent m-btn--icon m-btn--icon-only m-btn--pill btnEdit" title="Edit"><i class="la la-edit"></i></a>' +
-                '<a href="javascript:;" class="m-portlet__nav-link btn m-btn m-btn--hover-danger m-btn--icon m-btn--icon-only m-btn--pill btnDelete" title="Delete"><i class="la la-trash"></i></a>'
+            content = `<li class="m-nav__item"><span class="m-nav__link">
+            <i class="m-nav__link-icon flaticon-calendar"></i><span class="m-nav__link-text"> Ngày tạo : <strong>${t.created_time}</strong></span></span></li>
+            <li class="m-nav__item"><span class="m-nav__link">
+            <i class="m-nav__link-icon flaticon-calendar"></i><span class="m-nav__link-text"> Cập nhật : <strong>${t.updated_time}</strong></span></span></li>
+            <li class="m-nav__item mt-2 button_event">`;
+
+            content += `${permission_edit ? '<span class="m-badge mr-2 m-badge--success m-badge--wide btnEdit">Sửa</span>' : ''}`;
+            content += `${permission_delete ? '<span class="m-badge mr-2 m-badge--danger m-badge--wide btnDelete">Xóa</span>' : ''}`;
+
+            return content;
         }
     }];
     AJAX_DATATABLES.init();
-    loadCategory();
     AJAX_CRUD_MODAL.init();
     AJAX_CRUD_MODAL.tinymce();
     SEO.init_slug();
@@ -63,14 +69,6 @@ $(function() {
     $('[name="is_status"]').on("change", function () {
         table.search($(this).val(), "is_status")
     }), $('[name="is_status"]').selectpicker();
-
-    $('select[name="category_id"]').on("change", function () {
-        table.search($(this).val(), "category_id")
-    });
-
-    $('#modal_form').on('shown.bs.modal', function(e){
-        loadCategory();
-    });
 
     $(document).on('click','.btnEdit',function () {
         let modal_form = $('#modal_form');
@@ -90,19 +88,12 @@ $(function() {
                         }
                         if(key === 'thumbnail' && value) element.closest('.form-group').find('img').attr('src',media_url + value);
                     });
+                    let element = modal_form.find('[name="content"]');
+                    if(element.hasClass('tinymce') && response.data_info.content){
+                        tinymce.get(element.attr('id')).setContent(response.data_info.content);
+                    }
+                    element.val(response.data_info.content);
 
-                    $.each(response.data_language, function( i, value ) {
-                        let lang_code = value.language_code;
-                        $.each(value, function( key, val) {
-                            let element = modal_form.find('[name="language['+lang_code+']['+key+']"]');
-                            if(element.hasClass('tinymce') && val){
-                                tinymce.get(element.attr('id')).setContent(val);
-                            }
-                            element.val(val);
-                        });
-                    });
-
-                    loadCategory(response.data_category);
                     modal_form.modal('show');
                 },
                 error: function (jqXHR, textStatus, errorThrown)
@@ -115,34 +106,3 @@ $(function() {
         });
     });
 });
-
-function loadCategory(dataSelected) {
-    let selector = $('select.category');
-    selector.select2({
-        placeholder: 'Chọn danh mục',
-        allowClear: !0,
-        multiple: !1,
-        data: dataSelected,
-        ajax: {
-            url: url_ajax_load_category,
-            dataType: 'json',
-            delay: 250,
-            data: function(e) {
-                return {
-                    q: e.term,
-                    page: e.page
-                }
-            },
-            processResults: function(e, t) {
-                return t.page = t.page || 1, {
-                    results: e,
-                    pagination: {
-                        more: 30 * t.page < e.total_count
-                    }
-                }
-            },
-            cache: !0
-        }
-    });
-    if (typeof dataSelected !== 'undefined') selector.find('> option').prop("selected", "selected").trigger("change");
-}

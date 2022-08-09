@@ -17,13 +17,24 @@ use Symfony\Component\HttpClient\Exception\TransportException;
 /**
  * Provides the common logic from writing HttpClientInterface implementations.
  *
- * All methods are static to prevent implementers from creating memory leaks via circular references.
+ * All private methods are static to prevent implementers from creating memory leaks via circular references.
  *
  * @author Nicolas Grekas <p@tchwork.com>
  */
 trait HttpClientTrait
 {
     private static $CHUNK_SIZE = 16372;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function withOptions(array $options): self
+    {
+        $clone = clone $this;
+        $clone->defaultOptions = self::mergeDefaultOptions($options, $this->defaultOptions);
+
+        return $clone;
+    }
 
     /**
      * Validates and normalizes method, URL and options, and merges them with defaults.
@@ -391,6 +402,10 @@ trait HttpClientTrait
             throw new InvalidArgumentException(sprintf('Invalid "base_uri" option: host or scheme is missing in "%s".', implode('', $base)));
         }
 
+        if (null === $url['scheme'] && (null === $base || null === $base['scheme'])) {
+            throw new InvalidArgumentException(sprintf('Invalid URL: scheme is missing in "%s". Did you forget to add "http(s)://"?', implode('', $base ?? $url)));
+        }
+
         if (null === $base && '' === $url['scheme'].$url['authority']) {
             throw new InvalidArgumentException(sprintf('Invalid URL: no "base_uri" option was provided and host or scheme is missing in "%s".', implode('', $url)));
         }
@@ -430,6 +445,10 @@ trait HttpClientTrait
 
         if ('' === ($url['path'] ?? '')) {
             $url['path'] = '/';
+        }
+
+        if ('?' === ($url['query'] ?? '')) {
+            $url['query'] = null;
         }
 
         return $url;

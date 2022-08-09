@@ -1,4 +1,4 @@
-<?php 
+<?php
 if (!defined('BASEPATH')) exit('No direct script access allowed');
 
 if (!function_exists('button_admin')) {
@@ -6,8 +6,14 @@ if (!function_exists('button_admin')) {
     {
         $_this =& get_instance();
         $controller = $_this->uri->segment(2);
-        if ($_this->session->userdata['user_id'] == 1) {
-            showButtonAdd().showButtonDelete().showButtonReload();
+        if ($_this->session->userdata['user_id'] == 1 || $_this->session->userdata['admin_group_id'] == 1) {
+            if (in_array('add', $args)) {
+                showButtonAdd();
+            }
+            if (in_array('delete', $args)) {
+                showButtonDelete();
+            }
+            showButtonReload();
         } else {
             if (in_array('add', $args)) {
                 if (isset($_this->session->admin_permission[$controller]['add'])) {

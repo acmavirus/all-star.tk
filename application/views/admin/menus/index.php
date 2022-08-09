@@ -1,11 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ducto
- * Date: 22/12/2017
- * Time: 1:02 CH
- */
 defined('BASEPATH') OR exit('No direct script access allowed');?>
+
 <div class="m-content">
     <div class="m-portlet m-portlet--mobile">
         <div class="m-portlet__body">
@@ -16,14 +11,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');?>
                             <div class="form-group">
                                 <select id="menu_locations" class="form-control">
                                     <?php if (!empty($this->config->item('cms_menu'))) foreach ($this->config->item('cms_menu') as $lang => $name): ?>
-                                        <option value="<?php echo $lang ?>"><?php echo $name; ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <select id="menu_languages" class="form-control">
-                                    <?php if (!empty($this->config->item('language_name'))) foreach ($this->config->item('language_name') as $lang => $name): ?>
                                         <option value="<?php echo $lang ?>"><?php echo $name; ?></option>
                                     <?php endforeach; ?>
                                 </select>
@@ -52,6 +39,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');?>
 </div>
 
 <script>
+    var url_ajax_load = '<?php echo site_admin_url('menus/ajax_load') ?>';
     var url_ajax_load_menu = '<?php echo site_admin_url('menus/ajax_load_menu') ?>';
     var url_ajax_save_menu = '<?php echo site_admin_url('menus/ajax_save_menu') ?>';
 </script>

@@ -12,82 +12,77 @@ $(function() {
         title: "ID",
         width: 50,
         textAlign: "center",
-        sortable: 'desc',
+        sortable: 'asc',
         filterable: !1,
     }, {
         field: "title",
         title: "Tiêu đề",
-        width: 300
+        width: 150
     }, {
-        field: "is_featured",
-        title: "Nổi bật",
-        width: 70,
+        field: "category",
+        title: "Danh mục",
+        width: 150
+    }, {
+        field: "thumbnail",
+        title: "Hình ảnh",
         textAlign: "center",
+        width: 100,
         template: function (t) {
-            return '<span data-field="is_featured" data-value="'+(t.is_featured == 1 ? 0 : 1)+'" class="btnUpdateField">' + (t.is_featured == 1 ? '<i class="la la-star"></i>' : '<i class="la la-star-o"></i>') + "</span>"
+            return '<img class="img-thumbnail" src="'+t.thumbnail+'">'
         }
     }, {
         field: "is_status",
-        title: "Status",
+        title: "Trạng thái",
         textAlign: "center",
         width: 70,
         template: function (t) {
             var e = {
-                0: {title: "Disable", class: "m-badge--danger"},
-                1: {title: "Active", class: "m-badge--primary"},
+                0: {title: "Chờ duyệt", class: "m-badge--danger"},
+                1: {title: "Hiển thị", class: "m-badge--primary"},
             };
             return '<span data-field="is_status" data-value="'+(t.is_status == 1 ? 0 : 1)+'" class="m-badge ' + e[t.is_status].class + ' m-badge--wide btnUpdateField">' + e[t.is_status].title + "</span>"
         }
     }, {
-        field: "updated_time",
-        title: "Updated Time",
-        type: "date",
-        textAlign: "center",
-        format: "MM/DD/YYYY"
-    }, {
-        field: "created_time",
-        title: "Created Time",
-        type: "date",
-        textAlign: "center",
-        format: "MM/DD/YYYY"
-    }, {
         field: "action",
-        width: 110,
-        title: "Actions",
+        width: 250,
+        title: "Thông tin",
         sortable: !1,
         overflow: "visible",
         template: function (t, e, a) {
-            return '' +
-                '<a href="javascript:;" onclick="crawler_post(this,\''+t.source+'\')" class="m-portlet__nav-link btn m-btn m-btn--hover-accent m-btn--icon m-btn--icon-only" title="Get"><i class="la la-get-pocket"></i></a>' +
-                '<a href="javascript:;" class="m-portlet__nav-link btn m-btn m-btn--hover-accent m-btn--icon m-btn--icon-only m-btn--pill btnEdit" title="Edit"><i class="la la-edit"></i></a>' +
-                '<a href="javascript:;" class="m-portlet__nav-link btn m-btn m-btn--hover-danger m-btn--icon m-btn--icon-only m-btn--pill btnDelete" title="Delete"><i class="la la-trash"></i></a>'
+            content = `<li class="m-nav__item"><span class="m-nav__link">
+            <i class="m-nav__link-icon flaticon-avatar"></i><span class="m-nav__link-text"> Người tạo : <strong>${t.username}</strong></span></span></li> 
+            <li class="m-nav__item"><span class="m-nav__link">
+            <i class="m-nav__link-icon flaticon-visible"></i><span class="m-nav__link-text"> Lượt vào xem : <strong>${t.viewed}</strong></span></span></li>
+            <li class="m-nav__item"><span class="m-nav__link">
+            <i class="m-nav__link-icon flaticon-calendar"></i><span class="m-nav__link-text"> Ngày tạo : <strong>${t.created_time}</strong></span></span></li>
+            <li class="m-nav__item"><span class="m-nav__link">
+            <i class="m-nav__link-icon flaticon-calendar"></i><span class="m-nav__link-text"> Cập nhật : <strong>${t.updated_time}</strong></span></span></li>
+            <li class="m-nav__item mt-2 button_event">`;
+
+            content += `${permission_edit ? '<span class="m-badge mr-2 m-badge--success m-badge--wide btnEdit">Sửa</span>' : ''}`;
+            content += `${permission_delete ? '<span class="m-badge mr-2 m-badge--danger m-badge--wide btnDelete">Xóa</span>' : ''}`;
+
+            return content;
         }
     }];
     AJAX_DATATABLES.init();
-    loadCategory($('select.filter_category'));
-    loadCategory($('select.category'));
     AJAX_CRUD_MODAL.init();
     AJAX_CRUD_MODAL.tinymce();
     SEO.init_slug();
-
+    loadFilterCategory($('select.filter_category'));
+    loadCategory($('select.category'));
+    loadCategory($('select.category_primary'));
+    loadTag($('select.tag'));
+    loadMatch($('select.match'));
     $('[name="is_status"]').on("change", function () {
         table.search($(this).val(), "is_status")
     }), $('[name="is_status"]').selectpicker();
 
-    $('[name="is_featured"]').on("change", function () {
-        table.search($(this).val(), "is_featured")
-    }), $('[name="is_featured"]').selectpicker();
-
-    $('select[name="category_id"]').on("change", function () {
+    $('.filter_category').on("change", function () {
         table.search($(this).val(), "category_id")
     });
 
-    $('#modal_form').on('shown.bs.modal', function(e){
-        loadCategory($('.category'));
-    });
-
     $(document).on('click','.btnEdit',function () {
-        slug_disable = false;
         let modal_form = $('#modal_form');
         let id = $(this).closest('tr').find('input[type="checkbox"]').val();
         AJAX_CRUD_MODAL.edit(function () {
@@ -105,10 +100,34 @@ $(function() {
                         }
                         if(key === 'thumbnail' && value) element.closest('.form-group').find('img').attr('src',media_url + value);
                     });
-                    tinymce.get($('[name="description"]').attr('id')).setContent(response.data_info.description);
-                    tinymce.get($('[name="content"]').attr('id')).setContent(response.data_info.content);
 
-                    loadCategory($('select.category'),response.data_category);
+                    if (response.data_bets) {
+                        $.each(response.data_bets, function (key, value) {
+                            let element = modal_form.find('[name="data_bets['+key+']"]');
+                            element.val(value);
+
+                            if (key === 'away_logo' || key === 'home_logo') {
+                                element.closest('.form-group').find('img').attr('src', media_url + value);
+                            }
+                        });
+                    }
+                    if (response.data_dealer) {
+
+                        $.each(response.data_dealer, function (key, value) {
+                            let element = modal_form.find('[name="data_dealer['+key+']"]');
+                            element.val(value);
+                        });
+                    }
+
+                    let element = modal_form.find('[name="content"]');
+                    if(element.hasClass('tinymce') && response.data_info.content){
+                        tinymce.get(element.attr('id')).setContent(response.data_info.content);
+                    }
+                    element.val(response.data_info.content);
+                    if (response.data_category) loadCategory($('select.category'),response.data_category);
+                    if (response.data_category_primary) loadCategory($('select.category_primary'),response.data_category_primary);
+                    if (response.data_tag) loadTag($('select.tag'), response.data_tag);
+                    if (response.data_match) loadMatch($('select.match'), response.data_match);
                     modal_form.modal('show');
                 },
                 error: function (jqXHR, textStatus, errorThrown)
@@ -122,24 +141,28 @@ $(function() {
     });
 });
 
+function loadCategory(selector, dataSelected) {
+    let multiple = true;
+    if (selector.hasClass('category_primary')) {
+        multiple = false;
+    }
 
-function loadCategory(selector,dataSelected) {
     selector.select2({
         placeholder: 'Chọn danh mục',
         allowClear: !0,
-        multiple: !0,
+        multiple: multiple,
         data: dataSelected,
         ajax: {
             url: url_ajax_load_category,
             dataType: 'json',
             delay: 250,
-            data: function(e) {
+            data: function (e) {
                 return {
                     q: e.term,
                     page: e.page
                 }
             },
-            processResults: function(e, t) {
+            processResults: function (e, t) {
                 return t.page = t.page || 1, {
                     results: e,
                     pagination: {
@@ -153,22 +176,83 @@ function loadCategory(selector,dataSelected) {
     if (typeof dataSelected !== 'undefined') selector.find('> option').prop("selected", "selected").trigger("change");
 }
 
-function loadPost(dataSelected) {
-    let selector = $('select.posts');
+function loadFilterCategory(selector) {
+    let multiple = false;
     selector.select2({
+        placeholder: 'Chọn danh mục',
+        allowClear: !0,
+        multiple: multiple,
+        ajax: {
+            url: url_ajax_load_category,
+            dataType: 'json',
+            delay: 250,
+            data: function (e) {
+                return {
+                    q: e.term,
+                    page: e.page
+                }
+            },
+            processResults: function (e, t) {
+                return t.page = t.page || 1, {
+                    results: e,
+                    pagination: {
+                        more: 30 * t.page < e.total_count
+                    }
+                }
+            },
+            cache: !0
+        }
+    });
+    if (typeof dataSelected !== 'undefined') selector.find('> option').prop("selected", "selected").trigger("change");
+}
+
+function loadMatch(selector, dataSelected) {
+    selector.select2({
+        placeholder: 'Chọn trận đấu',
+        allowClear: !0,
+        multiple: !1,
+        data: dataSelected,
+        ajax: {
+            url: url_ajax_load_match,
+            dataType: 'json',
+            delay: 250,
+            data: function (e) {
+                return {
+                    q: e.term,
+                    page: e.page
+                }
+            },
+            processResults: function (e, t) {
+                return t.page = t.page || 1, {
+                    results: e,
+                    pagination: {
+                        more: 30 * t.page < e.total_count
+                    }
+                }
+            },
+            cache: !0
+        }
+    });
+    if (typeof dataSelected !== 'undefined') selector.find('> option').prop("selected", "selected").trigger("change");
+}
+
+function loadTag(selector, dataSelected) {
+    selector.select2({
+        placeholder: 'Chọn thẻ tag',
+        allowClear: !0,
         multiple: !0,
         data: dataSelected,
         ajax: {
-            url: url_ajax_load,
+            url: base_url + 'admin/category/ajax_load/tag',
             dataType: 'json',
             delay: 250,
-            data: function(e) {
+            data: function (e) {
                 return {
                     q: e.term,
                     page: e.page
                 }
             },
-            processResults: function(e, t) {
+            processResults: function (e, t) {
                 return t.page = t.page || 1, {
                     results: e,
                     pagination: {
@@ -180,57 +264,4 @@ function loadPost(dataSelected) {
         }
     });
     if (typeof dataSelected !== 'undefined') selector.find('> option').prop("selected", "selected").trigger("change");
-}
-
-function crawler_form() {
-    $('#modal_crawler_form').modal('show');
-}
-
-
-function crawler_post_detail(_this) {
-    let element = $(_this);
-    let source = element.closest('.modal').find('[name="link"]').val();
-    $.ajax({
-        url : base_url + 'crawler/ajax_get_post',
-        type: "POST",
-        data:{source:source},
-        dataType: "JSON",
-        beforeSend: function (){
-            element.append('<i class="fa fa-spinner fa-spin ml-2" style="font-size: 18px;color: #ffffff;"></i>').attr('disabled',true);
-        },
-        success: function(data) {
-            console.log(data);
-            element.attr('disabled',false).find('i.fa-spin').remove();
-            toastr[data.type](data.message);
-            $('#modal_crawler_form').modal('hide');
-        },
-        error: function (jqXHR, textStatus, errorThrown)
-        {
-            alert(textStatus);
-            console.log(jqXHR);
-        }
-    });
-}
-
-function crawler_post(_this,source) {
-    let element = $(_this);
-    let id = $(_this).closest('tr').find('input[type="checkbox"]').val();
-    $.ajax({
-        url : base_url + 'crawler/ajax_update_post',
-        type: "POST",
-        data: {id:id,source:source},
-        dataType: "JSON",
-        beforeSend: function () {
-            element.append('<i class="fa fa-spinner fa-spin ml-2" style="font-size: 18px;color: #dd4b39;"></i>').attr('disabled',true);
-        },
-        success: function(data) {
-            element.attr('disabled',false).find('i.fa-spin').remove();
-            toastr[data.type](data.message);
-        },
-        error: function (jqXHR, textStatus, errorThrown)
-        {
-            alert(textStatus);
-            console.log(jqXHR);
-        }
-    });
 }

@@ -1,46 +1,39 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ducto
- * Date: 10/01/2018
- * Time: 11:31 SA
- */
 defined('BASEPATH') OR exit('No direct script access allowed');
-class Setting_model extends CI_Model
-{
-    private function _all_setting(){
-        $dataSetting = file_get_contents(FCPATH . 'database' . DIRECTORY_SEPARATOR . 'settings.cfg');
-        $data = $dataSetting ? json_decode($dataSetting, true) : array();
-        return $data;
+
+class Setting_model extends STEVEN_Model {
+    public $table;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->table = 'setting';
     }
-    public function getAll(){
-        $this->load->library('session');
-        $data = '';
-        if(CACHE_MODE == TRUE){
-            $keyCache = '_all_setting';
-            $data = $this->cache->get($keyCache);
-        }
-        if(empty($data)){
-            $tmp = [];
-            $dataSetting = $this->_all_setting();
-            if (!empty($dataSetting)) foreach ($dataSetting as $key => $item) {
-                if ($key === 'meta') {
-                    $oneMeta = $item[$this->session->userdata('public_lang_code')];
-                    if (!empty($oneMeta)) foreach ($oneMeta as $keyMeta => $value) {
-                        $tmp[$keyMeta] = str_replace('"', '\'', $value);
-                    }
-                } else
-                    $tmp[$key] = $item;
-            }
-            $data = $tmp;
+
+    public function get_setting_by_key($key_data, $update_cache = false) {
+        $key = $this->table . "_setting_by_key_" . $key_data;
+        $data = $this->getCache($key);
+        if($data === false || $update_cache == true){
+            $this->db->select('*');
+            $this->db->from($this->table);
+            $this->db->where('key_setting', $key_data);
+            $data = $this->db->get()->row();
+            $this->setCache($key,$data);
         }
 
-        if(CACHE_MODE == TRUE) $this->cache->save($keyCache,$data,3600);
         return $data;
     }
 
-    public function getSetting($key){
-        $data = $this->getAll();
-        return !empty($data[$key]) ? $data[$key] : null;
+    public function getAllSettings($update_cache = false) {
+        $key = $this->table . "_getAllSettings";
+        $data = $this->getCache($key);
+        if($data === false || $update_cache == true){
+            $this->db->select('*');
+            $this->db->from($this->table);
+            $data = $this->db->get()->row();
+            $this->setCache($key,$data);
+        }
+        return $data;
     }
+
 }

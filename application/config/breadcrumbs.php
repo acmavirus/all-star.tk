@@ -13,7 +13,6 @@
 |
 | Defaults provided for twitter bootstrap 2.0
 */
-
 $config['crumb_divider'] = '<li class="m-nav__separator"> - </li>';
 $config['tag_open'] = '<ul class="m-subheader__breadcrumbs m-nav m-nav--inline">';
 $config['tag_close'] = '</ul>';
@@ -22,11 +21,12 @@ $config['crumb_first_open'] = '<li class="m-nav__item m-nav__item--home">';
 $config['crumb_last_open'] = '<li class="m-nav__item">';
 $config['crumb_close'] = '</li>';
 
+
 $config['frontend_crumb_divider'] = '';
-$config['frontend_tag_open'] = '<ul class="breadcrumb" vocab="http://schema.org/" typeof="BreadcrumbList">';
+$config['frontend_tag_open'] = '<ul class="breadcrumb">';
 $config['frontend_tag_close'] = '</ul>';
-$config['frontend_crumb_open'] = '<li property="itemListElement" typeof="ListItem">';
-$config['frontend_crumb_last_open'] = '<li property="itemListElement" typeof="ListItem" class="active">';
+$config['frontend_crumb_open'] = '<li class="breadcrumb-item">';
+$config['frontend_crumb_last_open'] = '<li class="breadcrumb-item active">';
 $config['frontend_crumb_close'] = '</li>';
 /* End of file breadcrumbs.php */
 /* Location: ./application/config/breadcrumbs.php */

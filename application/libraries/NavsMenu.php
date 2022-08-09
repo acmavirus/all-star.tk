@@ -76,7 +76,7 @@ class NavsMenu {
      *
      * @var string
      */
-    private $parentl1_tag_open        = '';
+    private $parentl1_tag_open        = '<li class="%s parent1">';
 
     /**
      * Closing tag of the menu item level one that has children
@@ -84,7 +84,7 @@ class NavsMenu {
      *
      * @var string
      */
-    private $parentl1_tag_close       = '';
+    private $parentl1_tag_close       = '</li>';
 
     /**
      * Anchor tag of the menu item level one that has children
@@ -424,7 +424,7 @@ class NavsMenu {
                     }
                     else
                     {
-                        $tag_open     = sprintf($this->item_tag_open,$icon);
+                        $tag_open     = sprintf($this->parent_tag_open,$icon);
                         $item_anchor = $this->parent_anchor;
                     }
                     $href        = $slug;
@@ -438,12 +438,11 @@ class NavsMenu {
 
                 $html .= $this->set_active($tag_open, $slug);
 
-
                 if (substr_count($item_anchor, '%s') == 3) {
-                    $html .= sprintf($item_anchor, $href, $label, $label);
+                    $html .= sprintf($item_anchor, $href, strip_tags($label), $label);
                 }
                 else {
-                    $html .= sprintf($item_anchor,'#', $label, $label);
+                    $html .= sprintf($item_anchor,'#', strip_tags($label), $label);
                 }
 
                 if ( $has_children )

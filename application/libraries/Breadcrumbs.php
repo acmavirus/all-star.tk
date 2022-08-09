@@ -17,6 +17,7 @@ class Breadcrumbs {
      *
      */
     private $breadcrumbs = array();
+    protected $current_url;
 
     /**
      * Constructor
@@ -27,8 +28,10 @@ class Breadcrumbs {
     public function __construct()
     {
         $this->ci =& get_instance();
+
         // Load config file
         $this->ci->load->config('breadcrumbs');
+
         // Get breadcrumbs display options
         $this->tag_open = $this->ci->config->item('tag_open');
         $this->tag_close = $this->ci->config->item('tag_close');
@@ -37,7 +40,6 @@ class Breadcrumbs {
         $this->crumb_close = $this->ci->config->item('crumb_close');
         $this->crumb_last_open = $this->ci->config->item('crumb_last_open');
         $this->crumb_divider = $this->ci->config->item('crumb_divider');
-
         log_message('debug', "Breadcrumbs Class Initialized");
     }
 
@@ -96,8 +98,8 @@ class Breadcrumbs {
 
         // add at firts
         array_unshift($this->breadcrumbs, array(
-            'page' => $page, 
-            'href' => $href,
+                'page' => $page,
+                'href' => $href,
             )
         );
     }
@@ -112,21 +114,49 @@ class Breadcrumbs {
      */
     function show()
     {
+
         if ($this->breadcrumbs) {
 
             // set output variable
             $output = $this->tag_open;
+            $breadcrumbJson = [
+                "@context" => "http://schema.org",
+                "@type"=> "BreadcrumbList",
+                "itemListElement" => []
+            ];
 
             // construct output
+            $i = 1;
             foreach ($this->breadcrumbs as $key => $crumb) {
-                $keys = array_keys($this->breadcrumbs);
-                if (end($keys) == $key) {
-                    $output .= $this->crumb_last_open . '' . $crumb['page'] . '' . $this->crumb_close;
+                if ($i == 1) {
+                    if ($this->ci->uri->segment(1) === 'amp') {
+                        $output .= $this->crumb_open . '<span class="br-icon"><amp-img layout="responsive" width="20" height="20" src="'. TEMPLATES_ASSETS. 'asset/img/icon/home.svg'.'"></amp-img></span>';
+                        $output .= '<a href="' . $crumb['href'] . '" title="' . $crumb['page'] . '">' . $crumb['page'] . '</a>';
+                        $output .= $this->crumb_divider.$this->crumb_close;
+                    } else {
+                        $output .= $this->crumb_open . '';
+                        $output .= '<a href="' . $crumb['href'] . '" title="' . $crumb['page'] . '">' . $crumb['page'] . '</a>';
+                        $output .= $this->crumb_divider.$this->crumb_close;
+                    }
+                } elseif($i == count($this->breadcrumbs)) {
+                    $output .= $this->crumb_last_open . '';
+                    $output .= '<a href="' . $crumb['href'] . '" title="' . $crumb['page'] . '">' . $crumb['page'] . '</a>';
+                    $output .= $this->crumb_divider.$this->crumb_close;
+
                 } else {
                     $output .= $this->crumb_open.'<a href="' . $crumb['href'] . '" title="' . $crumb['page'] . '">' . $crumb['page'] . '</a> '.$this->crumb_divider.$this->crumb_close;
                 }
+                array_push($breadcrumbJson['itemListElement'],[
+                    "@type" => "ListItem",
+                    "position" => $i,
+                    "item" => [
+                        "@id" => $crumb['href'],
+                        "name" => $crumb['page']
+                    ]
+                ]);
+                $i++;
             }
-
+            $output .= '<script type="application/ld+json">'.json_encode($breadcrumbJson).'</script>';
             // return output
             return $output . $this->tag_close . PHP_EOL;
         }

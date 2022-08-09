@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ducto
- * Date: 9/29/2018
- * Time: 12:38 PM
- */
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class User extends Admin_Controller
@@ -27,28 +21,29 @@ class User extends Admin_Controller
     {
         $data['heading_title'] = "Quản lý thành viên";
         $data['heading_description'] = 'Danh sách thành viên';
-        $data['main_content'] = $this->load->view($this->template_path . $this->_controller . DIRECTORY_SEPARATOR . $this->_method, $data, TRUE);
-        $this->load->view($this->template_main, $data);
+        $data['main_content'] = $this->load->view(TEMPLATE_PATH . $this->_controller . DIRECTORY_SEPARATOR . $this->_method, $data, TRUE);
+        $this->load->view(TEMPLATE_MAIN, $data);
     }
 
     public function profile()
     {
         $data['heading_title'] = "Thông tin của tôi";
-        $data['main_content'] = $this->load->view($this->template_path . $this->_controller . DIRECTORY_SEPARATOR . $this->_method, $data, TRUE);
-        $this->load->view($this->template_main, $data);
+        $data['profile'] = $this->_data->getUserByField('id',$this->session->userdata['user_id']);
+        $data['main_content'] = $this->load->view(TEMPLATE_PATH . $this->_controller . DIRECTORY_SEPARATOR . $this->_method, $data, TRUE);
+        $this->load->view(TEMPLATE_MAIN, $data);
     }
 
     public function activity()
     {
         $data['heading_title'] = "Hoạt động của tôi";
-        $data['main_content'] = $this->load->view($this->template_path . $this->_controller . DIRECTORY_SEPARATOR . $this->_method, $data, TRUE);
-        $this->load->view($this->template_main, $data);
+        $data['main_content'] = $this->load->view(TEMPLATE_PATH . $this->_controller . DIRECTORY_SEPARATOR . $this->_method, $data, TRUE);
+        $this->load->view(TEMPLATE_MAIN, $data);
     }
 
     public function login()
     {
         if ($this->ion_auth->logged_in() == true) redirect(site_admin_url());
-        $this->load->view($this->template_path . 'user/login');
+        $this->load->view(TEMPLATE_PATH . 'user/login');
     }
 
     public function ajax_list()
@@ -64,18 +59,23 @@ class User extends Admin_Controller
         $params = [
             'group_id' => !empty($queryFilter['group_id']) ? $queryFilter['group_id'] : '',
             'page' => $page,
-            'limit' => $limit
+            'limit' => $limit,
+            'order' => ['users.id'=>'DESC']
         ];
         if (isset($queryFilter['is_status']) && $queryFilter['is_status'] !== '')
             $params = array_merge($params, ['active' => $queryFilter['is_status']]);
 
         $listData = $this->_data->getData($params);
         if (!empty($listData)) foreach ($listData as $item) {
+
             $row = array();
             $row['checkID'] = $item->id;
             $row['id'] = $item->id;
             $row['username'] = $item->username;
             $row['fullname'] = $item->fullname;
+            $row['allias_name'] = $item->allias_name;
+            $row['avatar'] = $item->avatar;
+            $row['permission'] = $this->_data->getPermissionUser($item->id)[0]->name;
             $row['is_status'] = $item->active;
             $row['updated_time'] = $item->updated_time;
             $row['created_time'] = $item->created_time;
@@ -104,12 +104,12 @@ class User extends Admin_Controller
         $identity = $this->input->post('identity');
         $rules[] = array(
             'field' => 'identity',
-            'label' => str_replace(':', '', $this->lang->line('login_identity_label')),
+            'label' => 'username',
             'rules' => filter_var($identity, FILTER_VALIDATE_EMAIL) ? 'trim|required|valid_email' : 'trim|required'
         );
         $rules[] = array(
             'field' => 'password',
-            'label' => str_replace(':', '', $this->lang->line('login_password_label')),
+            'label' => 'mật khẩu',
             'rules' => 'trim|required'
         );
         if (GG_CAPTCHA_MODE == TRUE) {
@@ -175,8 +175,7 @@ class User extends Admin_Controller
         redirect(site_admin_url('user/login'), 'refresh');
     }
 
-    public function ajax_add()
-    {
+    public function ajax_add() {
         $this->checkRequestPostAjax();
         $data = $this->_convertData();
         $identity = $data['username'];
@@ -185,6 +184,9 @@ class User extends Admin_Controller
         $group_id = $data['group_id'];
         unset($data['group_id']);
         if ($this->ion_auth->register($identity, $password, $email, $data, array('group_id' => $group_id)) != false) {
+            $data_user = $this->_data->single(['username' => $identity],$this->_data->table);
+            $note   = 'Thêm user có id là : '.$data_user->id;
+            $this->addLogaction('user',$data,$data_user->id,$note,'Add');
             $message['type'] = 'success';
             $message['message'] = "Thêm mới thành công !";
         } else {
@@ -213,9 +215,12 @@ class User extends Admin_Controller
     {
         $this->checkRequestPostAjax();
         $data = $this->_convertData();
+        $data_old = $this->_data->getUserByField('id',$data['id']);
         if ($this->ion_auth->update($data['id'], $data)) {
             $this->ion_auth->remove_from_group(false, $data['id']);
             $this->ion_auth->add_to_group($data['group_id'], $data['id']);
+            $note   = 'Update user có id là : '.$data['id'];
+            $this->addLogaction('user',$data_old,$data['id'],$note,'Update');
             $message['type'] = 'success';
             $message['message'] = "Cập nhật thành công !";
         } else {
@@ -295,7 +300,7 @@ class User extends Admin_Controller
                 'label' => 'Email',
                 'rules' => 'trim|required|valid_email' . ($this->input->post('id') === 0 ? '|is_unique[' . $this->_data->_dbprefix . 'users.email]' : ''),
                 'errors' => array(
-                    'is_unique' => '%s đã tồn tại. Vui lòng chọn %s khác.',
+                    'is_unique' => '%s đã tồn tại. Vui lòng chọn email khác.',
                 )
             ),
             array(
@@ -308,7 +313,7 @@ class User extends Admin_Controller
                 'label' => 'Username',
                 'rules' => 'trim|required' . ($this->input->post('id') == 0 ? '|is_unique[' . $this->_data->_dbprefix . 'users.username]' : ''),
                 'errors' => array(
-                    'is_unique' => '%s đã tồn tại. Vui lòng chọn %s khác.',
+                    'is_unique' => '%s đã tồn tại. Vui lòng chọn username khác.',
                 )
             ),
             array(
@@ -348,5 +353,24 @@ class User extends Admin_Controller
         if (!empty($data['active'])) $data['active'] = 1; else $data['active'] = 0;
         unset($data['re-password']);
         return $data;
+    }
+
+    public function ajax_update_profile()
+    {
+        $this->checkRequestPostAjax();
+        $data = $this->input->post();
+        $user_id = $this->session->userdata['user_id'];
+        $data['updated_time'] = date('Y-m-d H:i');
+        $data_old = $this->_data->getUserByField('id',$user_id);
+        if ($this->ion_auth->update($user_id, $data)) {
+            $note   = 'Update user có id là : '.$user_id;
+            $this->addLogaction('user',$data_old,$user_id,$note,'Update');
+            $message['type'] = 'success';
+            $message['message'] = "Cập nhật thành công !";
+        } else {
+            $message['type'] = 'error';
+            $message['message'] = "Cập nhật thất bại !";
+        }
+        $this->returnJson($message);
     }
 }

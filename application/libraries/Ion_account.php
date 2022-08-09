@@ -150,8 +150,7 @@ class Ion_account
             {
                 $data = array(
                     'identity' => $user->{$this->config->item('identity', 'ion_account')},
-                    'forgotten_password_code' => $user->forgotten_password_code,
-                    'fullname' => $user->fullname
+                    'forgotten_password_code' => $user->forgotten_password_code
                 );
                 if (!$this->config->item('use_ci_email', 'ion_account'))
                 {
@@ -160,13 +159,12 @@ class Ion_account
                 }
                 else
                 {
-                    $message = $this->load->view($this->template_path.$this->config->item('email_templates', 'ion_account') . $this->config->item('email_forgot_password', 'ion_account'), $data, TRUE);
+                    $message = $this->load->view(TEMPLATE_PATH.$this->config->item('email_templates', 'ion_account') . $this->config->item('email_forgot_password', 'ion_account'), $data, TRUE);
                     $this->email->clear();
                     $this->email->from($this->config->item('admin_email', 'ion_account'), $this->config->item('site_title', 'ion_account'));
                     $this->email->to($user->email);
                     $this->email->subject($this->config->item('site_title', 'ion_account') . ' - ' . $this->lang->line('email_forgotten_password_subject'));
                     $this->email->message($message);
-
                     if ($this->email->send())
                     {
                         $this->set_message('forgot_password_successful');
@@ -231,6 +229,7 @@ class Ion_account
             else
             {
                 $message = $this->load->view($this->config->item('email_templates', 'ion_account').$this->config->item('email_forgot_password_complete', 'ion_account'), $data, true);
+
                 $this->email->clear();
                 $this->email->from($this->config->item('admin_email', 'ion_account'), $this->config->item('site_title', 'ion_account'));
                 $this->email->to($profile->email);
@@ -311,7 +310,6 @@ class Ion_account
         $this->ion_account_model->trigger_events('pre_account_creation');
 
         $email_activation = $this->config->item('email_activation', 'ion_account');
-
         $id = $this->ion_account_model->register($identity, $password, $email, $additional_data, $group_ids);
 
         if (!$email_activation)
@@ -454,6 +452,7 @@ class Ion_account
         $this->ion_account_model->trigger_events('logged_in');
 
         $recheck = $this->ion_account_model->recheck_session();
+
         // auto-login the user if they are remembered
         if (!$recheck && get_cookie($this->config->item('identity_cookie_name', 'ion_account')) && get_cookie($this->config->item('remember_cookie_name', 'ion_account')))
         {

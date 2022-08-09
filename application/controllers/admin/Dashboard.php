@@ -1,11 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ducto
- * Date: 9/29/2018
- * Time: 12:38 PM
- */
 defined('BASEPATH') OR exit('No direct script access allowed');
+
 class Dashboard extends Admin_Controller
 {
     public function __construct()
@@ -21,7 +16,7 @@ class Dashboard extends Admin_Controller
         $this->breadcrumbs->push($data['heading_title'], '#');
         $data['breadcrumbs'] = $this->breadcrumbs->show();
         /*Breadcrumbs*/
-        $data['main_content'] = $this->load->view($this->template_path.'dashboard/index', $data, TRUE);
-        $this->load->view($this->template_main, $data);
+        $data['main_content'] = $this->load->view(TEMPLATE_PATH.'dashboard/index', $data, TRUE);
+        $this->load->view(TEMPLATE_MAIN, $data);
     }
 }

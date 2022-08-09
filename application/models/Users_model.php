@@ -1,16 +1,11 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ducto
- * Date: 10/2/2018
- * Time: 11:43 PM
- */
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Users_model extends STEVEN_Model
 {
     public $table_user_group;
     public $table_user_favourite;
+    public $table_group;
 
     public function __construct()
     {
@@ -18,9 +13,10 @@ class Users_model extends STEVEN_Model
         $this->table = "users";
         $this->table_user_group = "users_groups";
         $this->table_user_favourite = "users_favourites";
-        $this->column_order = array("$this->table.id", "$this->table.id", "$this->table.username", "$this->table.email", "$this->table.first_name", "$this->table.active", "$this->table.created_time", "$this->table.updated_time");
-        $this->column_search = array("$this->table.username");
-        $this->order_default = array("$this->table.created_time" => "DESC");
+        $this->table_group = "groups";
+        $this->column_order = array("$this->table.id", "$this->table.id", "$this->table.username", "$this->table.email", "$this->table.fullname", "$this->table.active", "$this->table.created_time", "$this->table.updated_time");
+        $this->column_search = array("username","fullname");
+        $this->order_default = array("$this->table.id" => "DESC");
     }
 
 
@@ -54,7 +50,6 @@ class Users_model extends STEVEN_Model
         $this->db->group_by("$this->table.id");
         return $this->db->get($this->table)->row();
     }
-
     public function getSelect2($ids){
         $this->db->select("$this->table.id, CONCAT(fullname, ' (', email, ')') AS text");
         $this->db->from($this->table);
@@ -64,14 +59,12 @@ class Users_model extends STEVEN_Model
         $query = $this->db->get();
         return $query->result();
     }
-
     public function updateField($account_id, $key, $value)
     {
         $this->db->where($this->table . '.id', $account_id);
         $this->db->update($this->table, array($this->table . '.' . $key => $value));
         return true;
     }
-
     public function saveFavourite($user_id,$product_id){
         $data = [
             'account_id' => $user_id,
@@ -80,11 +73,17 @@ class Users_model extends STEVEN_Model
         if(!$this->save($data,$this->table_user_favourite)) return false;
         return true;
     }
-
     public function getDataIdFavourite($user_id){
         $params = [
             'account_id' => $user_id,
         ];
         return $this->getDataAll($params,$this->table_user_favourite);
+    }
+    public function getPermissionUser($user_id) {
+        $this->db->select('*');
+        $this->db->from("$this->table_group");
+        $this->db->join("$this->table_user_group", "$this->table_user_group.group_id = $this->table_group.id", 'ON');
+        $this->db->where("$this->table_user_group.user_id", $user_id);
+        return $this->db->get()->result();
     }
 }

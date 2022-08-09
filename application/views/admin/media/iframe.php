@@ -1,11 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ducto
- * Date: 14/12/2017
- * Time: 10:07 SA
- */
 defined('BASEPATH') OR exit('No direct script access allowed');
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -15,8 +10,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <meta name="apple-mobile-web-app-capable" content="yes" />
 </head>
 <body onload="loadMoxman()">
-<script src="<?php echo $this->templates_assets ?>plugins/jquery/dist/jquery.min.js" type="text/javascript"></script>
-<script src="<?php echo $this->templates_assets;?>plugins/moxiemanager/js/moxman.loader.min.js"></script>
-<script src="<?php echo $this->templates_assets;?>js/page/media.js"></script>
+<script src="<?php echo TEMPLATE_ASSET ?>plugins/jquery/dist/jquery.min.js" type="text/javascript"></script>
+<script src="<?php echo TEMPLATE_ASSET;?>plugins/moxiemanager/js/moxman.loader.min.js"></script>
+<script src="<?php echo TEMPLATE_ASSET;?>js/page/media.js"></script>
 </body>
 </html>

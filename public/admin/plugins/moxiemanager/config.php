@@ -16,10 +16,10 @@ require_once $root . "/config.php";
 	// Filesystem
 	$moxieManagerConfig['filesystem.rootpath'] = MEDIA_PATH;
 	$moxieManagerConfig['filesystem.include_directory_pattern'] = '';
-	$moxieManagerConfig['filesystem.exclude_directory_pattern'] = '/^mcith$/i';
+	$moxieManagerConfig['filesystem.exclude_directory_pattern'] = '/^('.MEDIA_HIDE_FOLDER.')$/i';
 	$moxieManagerConfig['filesystem.include_file_pattern'] = '';
 	$moxieManagerConfig['filesystem.exclude_file_pattern'] = '';
-	$moxieManagerConfig['filesystem.extensions'] = 'jpg,ico,jpeg,png,gif';
+	$moxieManagerConfig['filesystem.extensions'] = 'jpg,ico,jpeg,png,gif,html,htm,txt,docx,doc,zip,pdf';
 	$moxieManagerConfig['filesystem.readable'] = true;
 	$moxieManagerConfig['filesystem.writable'] = true;
 	$moxieManagerConfig['filesystem.overwrite_action'] = "";
@@ -97,7 +97,7 @@ require_once $root . "/config.php";
 	$moxieManagerConfig['download.allow_override'] = '*';
 
 	// Thumbnail
-	$moxieManagerConfig['thumbnail.enabled'] = false;
+	$moxieManagerConfig['thumbnail.enabled'] = true;
 	$moxieManagerConfig['thumbnail.auto_generate'] = true;
 	$moxieManagerConfig['thumbnail.use_exif'] = true;
 	$moxieManagerConfig['thumbnail.width'] = 90;
@@ -110,7 +110,7 @@ require_once $root . "/config.php";
 	$moxieManagerConfig['thumbnail.allow_override'] = '*';
 
 	// Authentication
-	$moxieManagerConfig['authenticator'] = 'CodeIgniterAuthenticator';
+	$moxieManagerConfig['authenticator'] = '';
 	$moxieManagerConfig['authenticator.login_page'] = '';
 
 	// SessionAuthenticator
@@ -130,11 +130,11 @@ require_once $root . "/config.php";
     //CodeIgniterAuthenticator
     $moxieManagerConfig['CodeIgniterAuthenticator.environment'] = DEBUG_MODE ? "development" : "production";
     $moxieManagerConfig['CodeIgniterAuthenticator.logged_in_key'] = "MyLoggedInKey";
-    $moxieManagerConfig['CodeIgniterAuthenticator.user_key'] = 'moxie_user';
+    $moxieManagerConfig['CodeIgniterAuthenticator.user_key'] = 'username';
 
 	// Local filesystem
 	$moxieManagerConfig['filesystem.local.wwwroot'] = MEDIA_PATH;
-	$moxieManagerConfig['filesystem.local.urlprefix'] = MEDIA_URL;
+	$moxieManagerConfig['filesystem.local.urlprefix'] = BASE_URL . MEDIA_NAME;
 	$moxieManagerConfig['filesystem.local.urlsuffix'] = '';
 	$moxieManagerConfig['filesystem.local.access_file_name'] = 'mc_access';
 	$moxieManagerConfig['filesystem.local.cache'] = false;
@@ -143,7 +143,7 @@ require_once $root . "/config.php";
 	// Log
 	$moxieManagerConfig['log.enabled'] = false;
 	$moxieManagerConfig['log.level'] = 'error';
-	$moxieManagerConfig['log.path'] = 'data/logs';
+    $moxieManagerConfig['log.path'] = $root . 'application/logs';
 	$moxieManagerConfig['log.filename'] = '{level}.log';
 	$moxieManagerConfig['log.format'] = '[{time}] [{level}] {message}';
 	$moxieManagerConfig['log.max_size'] = '100k';
@@ -155,7 +155,7 @@ require_once $root . "/config.php";
 
 	// Storage
 	$moxieManagerConfig['storage.engine'] = 'json';
-	$moxieManagerConfig['storage.path'] = './data/storage';
+    $moxieManagerConfig['storage.path'] = MEDIA_PATH;
 
 	// AutoFormat
 	$moxieManagerConfig['autoformat.rules'] = '';
@@ -164,7 +164,7 @@ require_once $root . "/config.php";
 
 	// AutoRename
 	$moxieManagerConfig['autorename.enabled'] = true;
-	$moxieManagerConfig['autorename.space'] = "_";
+	$moxieManagerConfig['autorename.space'] = "-";
 	$moxieManagerConfig['autorename.lowercase'] = false;
 
 	// BasicAuthenticator

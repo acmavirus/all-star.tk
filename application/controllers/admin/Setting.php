@@ -2,145 +2,87 @@
 
 class Setting extends Admin_Controller {
 
+    protected $_setting;
+
     public function __construct(){
         parent::__construct();
-        //tải file ngôn ngữ
-        //$this->lang->load('setting');
+
+        $this->load->model('setting_model');
+        $this->_setting  = new Setting_model();
     }
 
     public function index()
     {
-        $dataContent = file_get_contents('/home/settings.vuivetv.com/public_html/settings.cfg');
-        $data = $dataContent ? json_decode($dataContent,true) : array();
-        $data['heading_title'] = "Cấu hình hệ thống";
-        $data['heading_description'] = 'Cấu hình chung';
+        $data_seo = $this->_setting->get_setting_by_key('data_seo');
+        $data_301 = $this->_setting->get_setting_by_key('data_301');
+        $data_social = $this->_setting->get_setting_by_key('data_social');
+        $data_email = $this->_setting->get_setting_by_key('data_email');
+        $data['data_seo'] = !empty($data_seo) ? json_decode($data_seo->value_setting) : '';
+        $data['data_301'] = !empty($data_301) ? json_decode($data_301->value_setting) : '';
+        $data['data_social'] = !empty($data_social) ? json_decode($data_social->value_setting) : '';
+        $data['data_email'] = !empty($data_email) ? json_decode($data_email->value_setting) : '';
 
-        $data['list_db'] = $this->get_list_db();
-        $dataPost = $this->input->post();
-        if (!empty($dataPost)){
-            if(file_put_contents('/home/settings.vuivetv.com/public_html/settings.cfg',json_encode($dataPost))) {
-                $message['type'] = "success";
-                $message['message'] = "Cập nhật thành công !";
-            }else{
-                $message['type'] = 'error';
-                $message['message'] = "Cập nhật thất bại !";
-            }
-            $this->returnJson($message);
-        }
-        //$data['path1'] = glob(FCPATH.'application/views/templates/*',GLOB_ONLYDIR);
-        $data['main_content'] = $this->load->view($this->template_path . $this->_controller . DIRECTORY_SEPARATOR . 'index', $data, TRUE);
-        $this->load->view($this->template_main, $data);
+        $data['main_content'] = $this->load->view(TEMPLATE_PATH . $this->_controller . DIRECTORY_SEPARATOR . 'index', $data, TRUE);
+        $this->load->view(TEMPLATE_MAIN, $data);
     }
 
+    public function update_setting()
+    {
+        $this->checkRequestPostAjax();
+        $data = $this->input->post();
+        $key_setting = $data['key_setting'];
+        unset($data['key_setting']);
+        if (!empty($data)) {
+            $param_store = [
+                'value_setting' => json_encode($data),
+                'key_setting' => $key_setting,
+                'title' => $key_setting,
+            ];
+            $checkSetting = $this->_setting->get_setting_by_key($key_setting);
+            if (!empty($checkSetting)) {
+                unset($param_store['key_setting']);
+               $this->_setting->update(['id'=>$checkSetting->id],$param_store);
+            }else{
+               $this->_setting->save($param_store);
+            }
+        }
+
+        $data_mess = [
+            'message' => 'Update thành công',
+            'type' => 'success'
+        ];
+        die(json_encode($data_mess));
+    }
+
+    public function delete_cache_file($url = ''){
+        if (empty($url)){
+            $this->load->helper('file');
+            $url = $this->input->get('url');
+        }
+
+        if(!empty($url)){
+            $uri = str_replace(base_url(),'/',$url);
+            if($this->output->delete_cache($uri)){
+               $this->returnJson([
+                'type' => 'success',
+                'message' => 'Xóa cache database thành công !'
+            ]);
+            }
+        }else{
+            if(delete_files(FCPATH . 'application' . DIRECTORY_SEPARATOR . 'cache')){
+                $this->returnJson([
+                    'type' => 'success',
+                    'message' => 'Xóa cache database thành công !'
+                ]);
+            }
+        }
+
+    }
     public function ajax_clear_cache_db(){
-        shell_exec("curl http://vuive.live/debug/update_cache");
-        shell_exec("curl http://ghiban.live/debug/update_cache");
-        shell_exec("curl http://bongtron.live/debug/update_cache");
+        $this->deleteCache();
         $this->returnJson([
             'type' => 'success',
             'message' => 'Xóa cache database thành công !'
         ]);
     }
-
-    public function ajax_clear_cache_image(){
-        if($this->recursiveDelete(MEDIA_PATH . DIRECTORY_SEPARATOR . 'thumb'))
-            $this->returnJson([
-                'type' => 'success',
-                'message' => 'Xóa cache ảnh thành công !'
-            ]);
-        else
-            $this->returnJson([
-                'type' => 'error',
-                'message' => 'Xóa cache ảnh không thành công !'
-            ]);
-    }
-
-    private function recursiveDelete($str) {
-        if (is_file($str)) {
-            return @unlink($str);
-        }
-        elseif (is_dir($str)) {
-            $scan = glob(rtrim($str,'/').'/*');
-            foreach($scan as $index=>$path) {
-                $this->recursiveDelete($path);
-            }
-            return @rmdir($str);
-        }
-    }
-
-    private function get_list_db(){
-        $this->load->helper('directory');
-        $map = directory_map(FCPATH.'db');
-        $data = array();
-        if(!empty($map)) foreach ($map as $item){
-            $data[] = get_file_info(FCPATH.'db/'.$item);
-        }
-        usort($data, function($a, $b) {
-            return ($a['date'] > $b['date']) ? -1 : 1;
-        });
-        return $data;
-    }
-
-    public function downloadFile(){
-        $this->load->helper('download');
-        $file = $this->input->get('file');
-        $data = $this->load->file(FCPATH.'db/'.$file,true);
-        force_download($file,$data);
-    }
-
-    public function ajax_backup_db(){
-        if($this->input->server('REQUEST_METHOD') == 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-            // Load the DB utility class
-            $this->load->dbutil();
-            $prefs = array(
-                'tables'        => array(),   // Array of tables to backup.
-                'ignore'        => array(),                     // List of tables to omit from the backup
-                'format'        => 'text',                       // gzip, zip, txt
-                'filename'      => DB_DEFAULT_NAME."_".date('d_m_y').".sql",              // File name - NEEDED ONLY WITH ZIP FILES
-                'add_drop'      => TRUE,                        // Whether to add DROP TABLE statements to backup file
-                'add_insert'    => TRUE,                        // Whether to add INSERT data to backup file
-                'newline'       => "\n"                         // Newline character used in backup file
-            );
-            // Backup your entire database and assign it to a variable
-            $backup = $this->dbutil->backup($prefs);
-
-            $this->load->helper('file');
-            $data = write_file(FCPATH.'db/'.DB_DEFAULT_NAME."_".date('d_m_y_H_i').".sql", $backup);
-            sleep(1);
-            $message['type'] = "success";
-            $message['message'] = 'Backup successful';
-            $this->session->set_flashdata('message',$message);
-            print json_encode($data);
-        }
-        exit;
-    }
-
-    public function ajax_restore_db(){
-        if($this->input->server('REQUEST_METHOD') == 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-            $dbFile = $this->input->post('db_name');
-            $file = FCPATH.'db/'.$dbFile;
-
-            $cmd = "mysql -h {$this->db->hostname} -u {$this->db->username} -p{$this->db->password} {$this->db->database} < $file";
-            if(function_exists('shell_exec')) {
-                print json_encode(['status' => 1,'msg' => 'Khôi phục data thành công !']);
-                shell_exec($cmd);
-            }else{
-                print json_encode(['status' => 0,'msg' => 'Server chưa bật hàm shell_exec() !']);
-            }
-        }
-        exit;
-    }
-
-    public function ajax_delete_db(){
-        if($this->input->server('REQUEST_METHOD') == 'POST' && !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-            $dbFile = $this->input->post('db_name');
-            $file = FCPATH.'db/'.$dbFile;
-            print json_encode(unlink($file));
-        }
-        exit;
-    }
-    public function sortdate( $a, $b ) {
-        return $a["date"] - $b["date"];
-    }
-
 }

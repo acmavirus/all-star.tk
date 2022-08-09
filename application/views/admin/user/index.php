@@ -1,11 +1,7 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ducto
- * Date: 9/30/2018
- * Time: 1:10 AM
- */
-defined('BASEPATH') OR exit('No direct script access allowed');?>
+    defined('BASEPATH') OR exit('No direct script access allowed');
+?>
+
 <div class="m-content">
     <div class="m-portlet m-portlet--mobile">
         <div class="m-portlet__body">
@@ -108,13 +104,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');?>
                 <input type="hidden" name="id" value="0">
                 <div class="m-portlet__body">
                     <div class="form-group m-form__group row">
-                        <div class="col-lg-6">
+                        <div class="col-lg-4 col-12">
                             <label>
                                 Full Name:
                             </label>
                             <input type="text" name="fullname" class="form-control m-input" placeholder="Full name">
                         </div>
-                        <div class="col-lg-6">
+                        <div class="col-lg-4 col-12">
                             <label>
                                 Phone:
                             </label>
@@ -126,12 +122,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');?>
                                 </div>
                                 <input type="tel" name="phone" class="form-control m-input" placeholder="Phone">
                             </div>
-
                         </div>
-                    </div>
-
-                    <div class="form-group m-form__group row">
-                        <div class="col-lg-6">
+                        <div class="col-lg-4 col-12">
                             <label>
                                 Email:
                             </label>
@@ -144,7 +136,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');?>
                                 <input type="email" name="email" class="form-control m-input" placeholder="Email">
                             </div>
                         </div>
-                        <div class="col-lg-6">
+                    </div>
+                    <div class="form-group m-form__group row">
+
+                        <div class="col-lg-4 col-12">
                             <label>
                                 Username:
                             </label>
@@ -157,16 +152,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');?>
                                 <input type="text" name="username" class="form-control m-input" placeholder="Username">
                             </div>
                         </div>
-                    </div>
-
-                    <div class="form-group m-form__group row">
-                        <div class="col-lg-6">
+                        <div class="col-lg-4 col-12">
                             <label>
                                 Password:
                             </label>
                             <input type="password" name="password" class="form-control m-input">
                         </div>
-                        <div class="col-lg-6">
+                        <div class="col-lg-4 col-12">
                             <label>
                                 Re-Password:
                             </label>
@@ -175,15 +167,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');?>
                     </div>
 
                     <div class="form-group m-form__group row">
-                        <div class="col-lg-6">
-                            <label class="">
-                                Active:
+                        <div class="col-lg-6 col-12">
+                            <label>
+                                Bí danh
                             </label>
-                            <div class="m-input">
-                                <input data-switch="true" type="checkbox" name="active" checked="checked">
+                            <div class="input-group m-input-group m-input-group--square">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">
+                                        <i class="la la-envelope"></i>
+                                    </span>
+                                </div>
+                                <input type="text" name="allias_name" class="form-control m-input" placeholder="Bí danh">
                             </div>
                         </div>
-                        <div class="col-lg-6">
+
+                        <div class="col-lg-6 col-12">
                             <label>
                                 Group:
                             </label>
@@ -192,6 +190,40 @@ defined('BASEPATH') OR exit('No direct script access allowed');?>
                             </div>
                         </div>
                     </div>
+                    <div class="form-group m-form__group row">
+                        <div class="col-lg-4 col-12">
+                            <label>
+                                Mô tả:
+                            </label>
+                            <div class="m-input-group">
+                                <textarea type="text" name="description" rows="10" class="form-control"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-12">
+                            <label for="thumbnail">Ảnh đại diện</label>
+                            <div class="input-group m-input-group m-input-group--air">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="input_thumbnail">
+                                        <i class="la la-picture-o"></i>
+                                    </span>
+                                </div>
+                                <input type="text" name="avatar" onclick="FUNC.chooseImage(this)" class="form-control m-input chooseImage" placeholder="Click để chọn ảnh" aria-describedby="input_thumbnail">
+                            </div>
+                            <div class="alert m-alert m-alert--default preview text-center mt-1" role="alert">
+                                <img width="100" height="100" src="<?php echo getImageThumb('',100,100) ?>">
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-12">
+                            <label class="">
+                                Active:
+                            </label>
+                            <div class="m-input">
+                                <input data-switch="true" type="checkbox" name="active" checked="checked">
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
                 <?php echo form_close() ?>
             </div>

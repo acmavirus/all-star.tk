@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ducto
- * Date: 14/12/2017
- * Time: 9:54 SA
- */
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Media extends Admin_Controller
@@ -19,12 +13,12 @@ class Media extends Admin_Controller
         $data['breadcrumbs'] = $this->breadcrumbs->show();
         /*Breadcrumbs*/
         $data['iframe'] = site_admin_url('media/iframe');
-        $data['main_content'] = $this->load->view($this->template_path . $this->_controller . DIRECTORY_SEPARATOR . $this->_method, $data, TRUE);
-        $this->load->view($this->template_main, $data);
+        $data['main_content'] = $this->load->view(TEMPLATE_PATH . $this->_controller . DIRECTORY_SEPARATOR . $this->_method, $data, TRUE);
+        $this->load->view(TEMPLATE_MAIN, $data);
     }
 
     public function iframe(){
-        $this->load->view($this->template_path.'media/iframe');
+        $this->load->view(TEMPLATE_PATH.'media/iframe');
     }
 
 }

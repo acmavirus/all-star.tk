@@ -1,418 +1,570 @@
-<?php if (!defined('BASEPATH')) exit('No direct script access allowed');
+<?php if (!defined('BASEPATH')) {
+    exit('No direct script access allowed');
+}
 
-if (!function_exists('getAllBrand')) {
-    function getAllBrand()
+if (!function_exists('getByIdPage')) {
+    function getByIdPage($id)
     {
-        $_this =& get_instance();
+        $_this = &get_instance();
         $_this->load->model('category_model');
-        $categoryModel = new Category_model();
-        return (object)$categoryModel->getListRecursive('brand', 0);
-    }
-}
-
-if (!function_exists('countProductByCate')) {
-    function countProductByCate($cateId)
-    {
-        $_this =& get_instance();
-        $_this->load->model('product_model');
-        $catModel = new Product_model();
-        $data = $catModel->countPostByCate($cateId);
+        $model = new Category_model();
+        $data = $model->getById($id);
         return $data;
     }
 }
 
-if (!function_exists('countProductByType')) {
-    function countProductByType($typeId, $categoryId)
+if (!function_exists('getSetting')) {
+    function getSetting($key_setting, $name = '')
     {
-        $_this =& get_instance();
-        $_this->load->model('product_model');
-        $productModel = new Product_model();
-        $data = $productModel->countProductByType($typeId, $categoryId);
+        $instance = &get_instance();
+        $instance->load->model('setting_model');
+        $setting_model = new Setting_model();
+        $data = $setting_model->get_setting_by_key($key_setting);
+        $data = !empty($data->value_setting) ? json_decode($data->value_setting) : '';
+        return !empty($data) ? (!empty($name) ? $data->$name : $data) : '';
+    }
+}
+if (!function_exists('getDrag')) {
+    function getDrag($type)
+    {
+        $_this = &get_instance();
+        $_this->load->model('drag_model');
+        $model = new Drag_model();
+        $data = $model->getDataDrag($type);
         return $data;
     }
 }
-if (!function_exists('getListProduct')) {
-    function getListProduct($ids, $limit = 10)
+if (!function_exists('isMobileDevice')) {
+    function isMobileDevice()
     {
-        $_this =& get_instance();
-        $_this->load->model('product_model');
-        $productModel = new Product_model();
-        $params = array(
-            'is_status' => 1,
-            'in' => $ids,
-            'limit' => $limit
-        );
-        $data = $productModel->getData($params);
-        return $data;
+        return preg_match("/(android|avantgo|blackberry|bolt|boost|cricket|docomo|fone|hiptop|mini|mobi|palm|phone|pie|tablet|up\.browser|up\.link|webos|wos)/i", $_SERVER["HTTP_USER_AGENT"]);
     }
 }
 
-if (!function_exists('getProductDetail')) {
-    function getProductDetail($id)
+if (!function_exists('getTag')) {
+    function getTag($args = array())
     {
-        $_this =& get_instance();
-        $_this->load->model('product_model');
-        $productModel = new Product_model();
-        $data = $productModel->getDetail($id);
+        $default = [
+            'limit' => 10,
+            'type' => 'tag',
+            'order' => ['id' => 'DESC']
+        ];
+
+        $params = array_merge($default, $args);
+        $_this = &get_instance();
+        $_this->load->model('category_model');
+        $model = new Category_model();
+        $data = $model->getDataFE($params);
         return $data;
     }
 }
-if (!function_exists('getProduct')) {
-    function getProduct($id, $select = '*', $language = '')
+if (!function_exists('getDataPost')) {
+    function getDataPost($params = array())
     {
-        $_this =& get_instance();
-        $_this->load->library('session');
-        $_this->load->model('product_model');
-        $productModel = new Product_model();
-        if (empty($language)) $language = !empty($_this->session->public_lang_code) ? $_this->session->public_lang_code : $_this->session->admin_lang;
-        $oneData = $productModel->getById($id, $select, $language);
-        return $oneData;
-    }
-}
-
-if (!function_exists('getPostByHash')) {
-    function getPostByHash($source_hash, $select = '*'){
-        $_this =& get_instance();
+        $_this = &get_instance();
         $_this->load->model('post_model');
-        $postModel = new Post_model();
-        $oneData = $postModel->getByField('source_hash',$source_hash,$select,$_this->session->public_lang_code);
-        return $oneData;
+        $model = new Post_model();
+        $data = $model->getDataFE($params);
+        return $data;
     }
 }
-if (!function_exists('getMadeIn')) {
-    function getMadeIn($cateId)
+
+if (!function_exists('getDataCategory')) {
+    function getDataCategory($type = '')
     {
-        $_this =& get_instance();
+        $_this = &get_instance();
         $_this->load->model('category_model');
-        $catModel = new Category_model();
-        if (!$_this->cache->get('_all_category_' . $_this->session->public_lang_code)) {
-            $_this->cache->save('_all_category_' . $_this->session->public_lang_code, $_this->_data_category->getAll($_this->session->public_lang_code), 60 * 60 * 30);
-        }
-        $_all_category = $_this->cache->get('_all_category_' . $_this->session->public_lang_code);
-        $data = $catModel->getByIdCached($_all_category, $cateId);
-        return !empty($data) ? $data->title : '';
+        $model = new Category_model();
+        $data = $model->_all_category($type);
+        return $data;
     }
-
 }
-
-if (!function_exists('getAddressById')) {
-    function getAddressById($districtId)
+if (!function_exists('getCategoryChild')) {
+    function getCategoryChild($parent_id = 0)
     {
-        $_this =& get_instance();
-        $_this->load->model('location_model');
-        $catModel = new Location_model();
-        $data = $catModel->getDistrictById($districtId);
-        return !empty($data->path_with_type) ? $data->path_with_type : '';
-    }
-
-}
-
-if (!function_exists('getCategoryChildLv1')) {
-    function getCategoryChildLv1($parentId = 0)
-    {
-        $_this =& get_instance();
+        $_this = &get_instance();
         $_this->load->model('category_model');
-        $categoryModel = new Category_model();
-        if (!$_this->cache->get('_all_category_' . $_this->session->public_lang_code)) {
-            $_this->cache->save('_all_category_' . $_this->session->public_lang_code, $categoryModel->getAll($_this->session->public_lang_code), 60 * 60 * 30);
-        }
-        $_all_category = $_this->cache->get('_all_category_' . $_this->session->public_lang_code);
-        $data = $categoryModel->getListChild($_all_category, $parentId);
-        return $data;
+        $model = new Category_model();
+        $model->_recursive_child($model->_all_category(), $parent_id);
+        return $model->_list_category_child;
     }
 }
 
-if (!function_exists('getCategoryChildAll')) {
-    function getCategoryChildAll($parentId = 0)
+if (!function_exists('getAllTournamentId')) {
+    function getAllTournamentId()
     {
-        $_this =& get_instance();
+        $_this = &get_instance();
         $_this->load->model('category_model');
-        $categoryModel = new Category_model();
-        if (!$_this->cache->get('_all_category_' . $_this->session->public_lang_code)) {
-            $_this->cache->save('_all_category_' . $_this->session->public_lang_code, $categoryModel->getAll($_this->session->public_lang_code), 60 * 60 * 30);
+        $model = new Category_model();
+        return $model->getAllTournamentId();
+    }
+}
+
+if (!function_exists('getRate')) {
+    function getRate($args = array())
+    {
+        $_this = &get_instance();
+        $_this->load->model('reviews_model');
+        $reviews = new Reviews_model();
+        $data = $reviews->getRate($args);
+        return $data;
+    }
+}
+if (!function_exists('callCURL')) {
+    function callCURL($url, $data = array(), $type = "GET")
+    {
+        $resource = curl_init();
+        curl_setopt($resource, CURLOPT_URL, $url);
+
+        if ($type == "POST") {
+            curl_setopt($resource, CURLOPT_POST, true);
+            curl_setopt($resource, CURLOPT_POSTFIELDS, http_build_query($data));
         }
-        $_all_category = $_this->cache->get('_all_category_' . $_this->session->public_lang_code);
-        $categoryModel->_queue_select($_all_category, $parentId);
-        return $categoryModel->category_tree;
+        curl_setopt($resource, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($resource, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($resource, CURLOPT_TIMEOUT, 40);
+        $result = curl_exec($resource);
+        curl_close($resource);
+        return $result;
     }
 }
-if (!function_exists('getCategoryByType')) {
-    function getCategoryByType($parentId = 0, $type = 'post')
+
+if (!function_exists('data_bet')) {
+    function data_bet($bet_str)
     {
-        $_this =& get_instance();
-        $_this->load->model('category_model');
-        $categoryModel = new Category_model();
-        if (!$_this->cache->get('_all_category_' . $_this->session->public_lang_code)) {
-            $_this->cache->save('_all_category_' . $_this->session->public_lang_code, $categoryModel->getAll($_this->session->public_lang_code), 60 * 60 * 30);
+        if (!empty($bet_str)) {
+            $bet_data = convert_bet_data($bet_str);
+            $result = '';
+            $asia = array();
+            $asia[0] = isset($bet_data['live'][7]) ? $bet_data['live'][7] : '';
+            $asia[1] = isset($bet_data['live'][8]) ? $bet_data['live'][8] : '';
+            $asia[2] = isset($bet_data['live'][9]) ? $bet_data['live'][9] : '';
+            $asia = parse_part_bet_data($asia);
+
+            $uk = array();
+            $uk[0] = isset($bet_data['live'][0]) ? $bet_data['live'][0] : '';
+            $uk[1] = isset($bet_data['live'][1]) ? $bet_data['live'][1] : '';
+            $uk[2] = isset($bet_data['live'][2]) ? $bet_data['live'][2] : '';
+
+            $big = array();
+            $big[0] = isset($bet_data['live'][11]) ? $bet_data['live'][11] : '';
+            $big[1] = isset($bet_data['live'][12]) ? $bet_data['live'][12] : '';
+            $big[2] = isset($bet_data['live'][13]) ? $bet_data['live'][13] : '';
+            $big = parse_part_bet_data($big);
+
+            $result .= '<p class="mb-1"><span class="font-weight-bold">' . $asia[0] . '*' . $asia[1] . '*' . $asia[2] . '</span> <span>(Châu Á)</span></p>';
+            $result .= '<p class="mb-1"><span class="font-weight-bold">' . $uk[0] . '/' . $uk[1] . '/' . $uk[2] . '</span> <span>(Châu Âu)</span></p>';
+            $result .= '<p class="mb-1"><span class="font-weight-bold">' . $big[0] . '*' . $big[1] . '*' . $big[2] . '</span> <span>(Tài xỉu)</span></p>';
+        } else {
+            $result = '<span>Dữ liệu đang được cập nhật</span>';
         }
-        $_all_category = $_this->cache->get('_all_category_' . $_this->session->public_lang_code);
-        $data = $categoryModel->getAllCategoryByType($_this->session->public_lang_code, $type, $parentId);
-        return $data;
-    }
-}
-if (!function_exists('getCategoryById')) {
-    function getCategoryById($id)
-    {
-        $_this =& get_instance();
-        $_this->load->model('category_model');
-        $categoryModel = new Category_model();
-        $data = $categoryModel->getById($id, '', $_this->session->public_lang_code);
-        return $data;
+        return $result;
     }
 }
 
-if (!function_exists('getPageById')) {
-    function getPageById($id)
+if (!function_exists('convert_bet_data')) {
+    function convert_bet_data($str_bet_data)
     {
-        $_this =& get_instance();
-        $_this->load->model('page_model');
-        $dataModel = new Page_model();
-        $data = $dataModel->getById($id, '', $_this->session->public_lang_code);
-        return $data;
-    }
-}
-
-if (!function_exists('getUserById')) {
-    function getUserById($id)
-    {
-        $_this =& get_instance();
-        $_this->load->model('users_model');
-        $dataModel = new Users_model();
-        $data = $dataModel->getById($id, '', $_this->session->public_lang_code);
-        return $data;
-    }
-}
-
-if (!function_exists('getListProductByCateId')) {
-    function getListProductByCateId($id, $limit = 10, $featured = 0)
-    {
-        $_this =& get_instance();
-        $_this->load->model(['product_model', 'category_model']);
-        $categoryModel = new Category_model();
-        $productModel = new Product_model();
-        if (!$_this->cache->get('_all_category_' . $_this->session->public_lang_code)) {
-            $_this->cache->save('_all_category_' . $_this->session->public_lang_code, $categoryModel->getAll($_this->session->public_lang_code), 60 * 60 * 30);
-        }
-        $_all_category = $_this->cache->get('_all_category_' . $_this->session->public_lang_code);
-        $categoryModel->_recursive_child_id($_all_category, $id);
-        $params = array(
-            'is_status' => 1,
-            'is_featured' => $featured,
-            'category_id' => $categoryModel->_list_category_child_id,
-            'limit' => $limit
-        );
-        $data = $productModel->getData($params);
-        return $data;
-    }
-}
-
-if (!function_exists('getListNewsByCateId')) {
-    function getListNewsByCateId($id, $limit = 10, $featured = 0)
-    {
-        $_this =& get_instance();
-        $_this->load->model(['post_model', 'category_model']);
-        $categoryModel = new Category_model();
-        $postModel = new Post_model();
-        if (!$_this->getCache('_all_category_' . $_this->session->public_lang_code)) {
-            $_this->setCache('_all_category_' . $_this->session->public_lang_code, $categoryModel->getAll($_this->session->public_lang_code), 60 * 60 * 30);
-        }
-        $_all_category = $_this->getCache('_all_category_' . $_this->session->public_lang_code);
-        $categoryModel->_recursive_child_id($_all_category, $id);
-        $params = array(
-            'is_status' => 1,
-            'category_id' => $categoryModel->_list_category_child_id,
-            'limit' => $limit,
-            'order' => ['ngay_ban_hanh' => 'DESC']
-        );
-        if(!empty($featured)) $params['order']=array('is_featured'=>'DESC');
-        $data = $postModel->getData($params);
-        return $data;
-    }
-}
-
-if (!function_exists('listBannerByPosition')) {
-    function listBannerByPosition($position_id)
-    {
-        $_this =& get_instance();
-        $_this->load->model('banner_model');
-        $bannerModel = new Banner_model();
-        $data = $bannerModel->getData(['lang_code' => $_this->session->public_lang_code, 'property_id' => $position_id]);
-        return $data;
-    }
-
-}
-if (!function_exists('covertMoney')) {
-    function covertMoney($number)
-    {
-        if ($number != null) {
-            return number_format($number, 0, '', '.');
-        }
-    }
-}
-if (!function_exists('showRatting')) {
-    function showRatting($diem)
-    {
-        for ($i = 1; $i <= 5; $i++) {
-            if ($i <= $diem) {
-                echo '<i class="icon_star active"></i>';
-            } else {
-                echo '<i class="icon_star"></i>';
+        $bet_data_ar = explode(';', $str_bet_data);
+        $bet_data = array();
+        for ($i = 0; $i < count($bet_data_ar); ++$i) {
+            if ($bet_data_ar[$i] == 'Crown') {
+                if ($bet_data_ar[$i + 1] != '') {
+                    $bet_data['data'] = explode(',', $bet_data_ar[$i + 1]);
+                }
+                if ($bet_data_ar[$i + 2]) {
+                    $bet_data['live'] = explode(',', $bet_data_ar[$i + 2]);
+                }
+                break;
+            } elseif ($bet_data_ar[$i] == 'Bet365') {
+                if ($bet_data_ar[$i + 1] != '') {
+                    $bet_data['data'] = explode(',', $bet_data_ar[$i + 1]);
+                }
+                if ($bet_data_ar[$i + 2]) {
+                    $bet_data['live'] = explode(',', $bet_data_ar[$i + 2]);
+                }
+                break;
+            } elseif ($bet_data_ar[$i] == '10BET') {
+                if ($bet_data_ar[$i + 1] != '') {
+                    $bet_data['data'] = explode(',', $bet_data_ar[$i + 1]);
+                }
+                if ($bet_data_ar[$i + 2]) {
+                    $bet_data['live'] = explode(',', $bet_data_ar[$i + 2]);
+                }
+                break;
             }
         }
-    }
-}
-if (!function_exists('cutString')) {
-    function cutString($chuoi, $max)
-    {
-        $length_chuoi = strlen($chuoi);
-        if ($length_chuoi <= $max) {
-            return $chuoi;
-        } else {
-            return mb_substr($chuoi, 0, $max, 'UTF-8') . '...';
-        }
+        $bet_data = parse_bet_data($bet_data);
+        return $bet_data;
     }
 }
 
-if (!function_exists('getTags')) {
-    function getTags($keyword)
+if (!function_exists('parse_part_bet_data')) {
+    function parse_part_bet_data($bet)
     {
-        $tags = '';
-        if (!empty($keyword)) {
-            $listTags = explode(',', trim($keyword));
-            if(!empty($listTags)) foreach ($listTags as $k => $tag) {
-                $tag = trim($tag);
-                if(!empty($tag) && $tag !== ''){
-                    $tags .= $k != 0 ? ', ' : '';
-                    $tags .= '<a href="' . getUrlTag($tag) . '" title="' . $tag . '">' . $tag . '</a>';
+
+        foreach ($bet as $index => &$data) {
+
+            if ($index == 1) {
+                continue;
+            }
+
+            if ($data !== '') {
+                if (strpos($data, '/') !== false) {
+                    $data = explode('/', $data);
+                    $data = $data[0] / $data[1];
+                }
+
+                $data = (float)$data;
+
+                if ($data > 1) {
+                    $data = $data - 2;
+                }
+
+                $data = number_format($data, 2);
+            }
+        }
+        return $bet;
+    }
+}
+
+if (!function_exists('parse_bet_data')) {
+    function parse_bet_data($bet)
+    {
+        $run = [7, 9, 11, 13];
+        foreach ($run as $i) {
+            if (!isset($bet['live'][$i])) {
+                continue;
+            }
+
+            $data = (float)$bet['live'][$i];
+
+            if ($data > 1) {
+                $data = $data - 2;
+            }
+
+            $data = number_format($data, 2);
+            $bet['live'][$i] = $data;
+        }
+
+        foreach ($run as $j) {
+            if (!isset($bet['data'][$j])) {
+                continue;
+            }
+
+            $data = (float)$bet['data'][$j];
+
+            if ($data > 1) {
+                $data = $data - 2;
+            }
+
+            $data = number_format($data, 2);
+            $bet['data'][$j] = $data;
+        }
+
+        return $bet;
+    }
+}
+if (!function_exists('closetags')) {
+    function closetags($html)
+    {
+        preg_match_all('#<(?!meta|img|br|hr|input\b)\b([a-z]+)(?: .*)?(?<![/|/ ])>#iU', $html, $result);
+        $openedtags = $result[1];
+        preg_match_all('#</([a-z]+)>#iU', $html, $result);
+        $closedtags = $result[1];
+        $len_opened = count($openedtags);
+        if (count($closedtags) == $len_opened) {
+            return $html;
+        }
+        $openedtags = array_reverse($openedtags);
+        for ($i = 0; $i < $len_opened; $i++) {
+            if (!in_array($openedtags[$i], $closedtags)) {
+                $html .= '</' . $openedtags[$i] . '>';
+            } else {
+                unset($closedtags[array_search($openedtags[$i], $closedtags)]);
+            }
+        }
+        return $html;
+    }
+}
+
+if (!function_exists('array_group_by')) {
+    function array_group_by($arr, callable $key_selector)
+    {
+        $arr = json_decode(json_encode($arr), true);
+        $result = array();
+        foreach ($arr as $i) {
+            $key = call_user_func($key_selector, $i);
+            $result[$key][] = (object)$i;
+        }
+        return $result;
+    }
+}
+
+if (!function_exists('getCateById')) {
+    function getCateById($id)
+    {
+        $ci = &get_instance();
+        $ci->load->model(['category_model']);
+        $_data_category = new Category_model();
+        return $_data_category->getByIdCached($id);
+    }
+}
+
+if (!function_exists('getReward')) {
+    function getReward($category)
+    {
+        if ($category == 1) {
+            $reward = [
+                0 => '',
+                1 => 'ĐB',
+                2 => 'G1',
+                3 => 'G2',
+                4 => 'G3',
+                5 => 'G4',
+                6 => 'G5',
+                7 => 'G6',
+                8 => 'G7'
+            ];
+        } else {
+            $reward = [
+                0 => 'G8',
+                1 => 'G7',
+                2 => 'G6',
+                3 => 'G5',
+                4 => 'G4',
+                5 => 'G3',
+                6 => 'G2',
+                7 => 'G1',
+                8 => 'ĐB'
+            ];
+        }
+        return $reward;
+    }
+}
+if (!function_exists('getRewardVietlot')) {
+    function getRewardVietlot($category)
+    {
+        if ($category == 44) {
+            $reward = [
+                0 => 'G.1',
+                1 => 'G.2',
+                2 => 'G.3',
+                3 => 'KK'
+            ];
+        } else {
+            $reward = [
+                0 => 'Giải Nhất',
+                1 => 'G.2',
+                2 => 'G.3',
+                3 => 'KK'
+            ];
+        }
+        return $reward;
+    }
+}
+
+if (!function_exists('groupDisTime')) {
+    function groupDisTime($dataApi)
+    {
+        $groupDisplaytime = array();
+        if (!empty($dataApi)) {
+            foreach ($dataApi as $key => $value) {
+                $groupDisplaytime[$value['displayed_time']][] = $value;
+            }
+        }
+        return $groupDisplaytime;
+    }
+}
+
+
+if (!function_exists('getLoto')) {
+    function getLoto($result, $return = '', $length = '')
+    {
+        if (is_array($result) == FALSE) $result = json_decode($result);
+        $arrNumber = [];
+        if(!empty($result)) foreach ($result as $item) {
+            if(!empty($item)) foreach ($item as $number) {
+                if(is_numeric($number)) {
+                    if ($length == 'full') $arrNumber[] = $number;
+                    else $arrNumber[] = substr($number, -2);
                 }
             }
         }
-        return $tags;
-    }
-}
-
-
-if (!function_exists('getPropertyById')) {
-    function getPropertyById($id)
-    {
-        $_this =& get_instance();
-        $_this->load->model('property_model');
-        $propertyModel = new Property_model();
-        if (!$_this->cache->get('_all_property_' . $_this->session->public_lang_code)) {
-            $_this->cache->save('_all_property_' . $_this->session->public_lang_code, $propertyModel->getAll($_this->session->public_lang_code), 60 * 60 * 30);
+        if ($return == 'loto') return $arrNumber;
+        $arrResult = [];
+        for ($i = 0; $i <= 9; $i++) {
+            $tmp['head'] = getValueLoto($i, $arrNumber, false);
+            $tmp['tail'] = getValueLoto($i, $arrNumber, true);
+            $arrResult[] = $tmp;
         }
-        $_all_property = $_this->cache->get('_all_property_' . $_this->session->public_lang_code);
-        $data = $propertyModel->getByIdCached($_all_property, $id);
-        return $data;
+        return $arrResult;
     }
-}
-
-
-if (!function_exists('getPropertyByProduct')) {
-    function getPropertyByProduct($productId, $type)
+    function getValueLoto($numberCheck, $listNumber, $is_head = true)
     {
-        $_this =& get_instance();
-        $_this->load->model('product_model');
-        $productModel = new Product_model();
-        $data = $productModel->getPropertyByProduct($productId, $type);
-        return $data;
-    }
-}
-
-if (!function_exists('')) {
-    function checkExistCart($productId)
-    {
-        $_this =& get_instance();
-        $listItem = $_this->cart->contents();
-        if (!empty($listItem)) foreach ($listItem as $item) {
-            if ($item['id'] == $productId) return true;
+        $string = '';
+        if (!empty($listNumber)) foreach ($listNumber as $number) {
+            if($is_head == true && $numberCheck == $number[0]) $string .= "<span>$number[1]</span>";
+            if($is_head != true && $numberCheck == $number[1]) $string .= "<span>$number[0]</span>";
         }
-        return false;
+        return $string;
     }
 }
-if (!function_exists('getPostNews')) {
-    function getPostNews()
+
+if (!function_exists('getCatByWeekDay')) {
+    function getCatByWeekDay($weekDay)
     {
-        $_this =& get_instance();
-        $_this->load->model('post_model');
-        $postModel = new Post_model();
-        $params = array(
-            'is_status' => 1, //0: Huỷ, 1: Hiển thị, 2: Nháp
-            'lang_code' => $_this->session->public_lang_code,
-            'limit' => 5,
-        );
-        $data = $postModel->getData($params);
+        $ci = &get_instance();
+        $nameCache = "sidebarLeftCatbywd_{$weekDay}";
+        $result = $ci->getCache($nameCache);
+        if (empty($result)) {
+            $ci->load->model('category_model');
+            $category_model = new Category_model();
+            $result = [];
+            $type = 'lottery';
+            $cat_result = $category_model->getListRecursive($type);
+            if (!empty($cat_result)) {
+                $cat_MB = $category_model->getByCode('xsmb');
+                $cat_MT = $cat_result[1]->list_child;
+                $cat_MN = $cat_result[2]->list_child;
+                $cat_child = array_merge($cat_MN, $cat_MT);
+                if (!empty($cat_child)) {
+                    foreach ($cat_child as $key => $item) {
+                        $arr = json_decode($item->weekday, true);
+                        if ($weekDay !== null && in_array($weekDay, $arr)) {
+                            $result[] = $item;
+                        }
+                    }
+                    array_push($result, $cat_MB);
+                    $result = array_reverse($result);
+                    $ci->setCache($nameCache, $result, 10);
+                }
+            }
+        }
+        return $result;
+    }
+}
+
+if (!function_exists('getResultVietlot')) {
+    function getResultVietlot($categoryId)
+    {
+        $ci = &get_instance();
+        $nameCache = "ResultId_{$categoryId}";
+        $result = $ci->getCache($nameCache);
+        if (empty($result)) {
+            $urlApi_vietlot = API_DATACENTER . "result/getdataresult?api_id=$categoryId&limit=1";
+            $data_json_vietlot = json_decode(callCURL($urlApi_vietlot), true);
+            $result = (!empty($data_json_vietlot)) ? $data_json_vietlot['data']['data'] : array();
+            $ci->setCache($nameCache, $result);
+        }
+        return $result;
+    }
+}
+
+
+
+if (!function_exists('sidebarCategory')) {
+    function sidebarCategory($id)
+    {
+        $ci = &get_instance();
+        $nameCache =    "sidebarCategory_{$id}";
+        $data =   $ci->getCache($nameCache);
+        if (empty($result)) {
+            $ci->load->model('category_model');
+            $_data_category = new Category_model();
+            $param = [
+                'parent_id' => $id,
+                'is_status' => 1
+            ];
+            $data = $_data_category->getDataFE($param);
+            $ci->setCache($nameCache, $data, 3600);
+        }
         return $data;
     }
 }
 
-if (!function_exists('getCompare')) {
-    function getCompare()
-    {
-        $_this =& get_instance();
-        $_this->load->model('product_model');
-        $productModel = new Product_model();
-        $key = 'product_compare';
-        $dataId = get_cookie($key);
-        $listProductId = json_decode($dataId, true);
-        $params['is_status'] = 1;
-        $params['lang_code'] = $_this->session->userdata('public_lang_code');
-        $params['in'] = $listProductId;
-        $params['limit'] = 10;
-        return $productModel->getData($params);
-    }
+function viewResultMB($data = []){
+    $_this = &get_instance();
+    if (isset($data[0])) $data = $data[0];
+    return $_this->load->view(TEMPLATE_PATH.'lottery/_result-xsmb', ['data' => $data], true);
 }
-if (!function_exists('getCityById')) {
-    function getCityById($id)
-    {
-        $_this =& get_instance();
-        $_this->load->model('location_model');
-        $locModel = new Location_model();
-        $data = $locModel->getCityById($id);
-        return !empty($data) ? $data->name : '';
-    }
+function viewResultSoiCau($data = []){
+    $_this = &get_instance();
+    if (isset($data[0])) $data = $data[0];
+    return $_this->load->view(TEMPLATE_PATH.'soicau/_result', ['data' => $data], true);
 }
-if (!function_exists('getDistrict')) {
-    function getDistrict($id)
-    {
-        $_this =& get_instance();
-        $_this->load->model('location_model');
-        $locModel = new Location_model();
-        $data = $locModel->getDistrictById($id);
-        return !empty($data) ? $data->name : '';
-    }
+function viewResultSoiCauProvince($data = []){
+    $_this = &get_instance();
+    if (isset($data[0])) $data = $data[0];
+    return $_this->load->view(TEMPLATE_PATH.'soicau/_result-province', ['data' => $data], true);
 }
-
-if (!function_exists('getFeedback')) {
-    function getFeedback(){
-        $_this =& get_instance();
-        $_this->load->model('feedback_model');
-        $feedbackModel = new Feedback_model();
-        $data = $feedbackModel->getAll('',1);
-        return $data;
-    }
+function viewResultProvince($oneItem, $data = []){
+    $_this = &get_instance();
+    if (isset($data[0])) $data = $data[0];
+    return $_this->load->view(TEMPLATE_PATH.'lottery/_result-province', [
+        'oneItem' => $oneItem,
+        'data' => $data
+    ], true);
+}
+function viewResultMTMN($oneItem, $data = [], $dow = null){
+    $_this = &get_instance();
+    return $_this->load->view(TEMPLATE_PATH.'lottery/_result-mt_mn', [
+        'oneItem' => $oneItem,
+        'data' => $data,
+        'dow' => $dow
+    ], true);
+}
+function viewLotoSingle($data = []){
+    if (isset($data[0])) $data = $data[0];
+    $_this = &get_instance();
+    return $_this->load->view(TEMPLATE_PATH.'lottery/_loto-single', ['data' => $data], true);
+}
+function viewLotoMulti($oneItem, $data = [], $dow = null){
+    $_this = &get_instance();
+    return $_this->load->view(TEMPLATE_PATH.'lottery/_loto-multi', [
+        'oneItem' => $oneItem,
+        'data' => $data,
+        'dow' => $dow
+    ], true);
 }
 
-if (!function_exists('getMostViewed')) {
-    function getMostViewed(){
-        $_this =& get_instance();
-        $_this->load->model(['post_model']);
-        $postModel = new Post_model();
-        $params = array(
-            'lang_code' => $_this->session->userdata('public_lang_code'),
-            'is_status' => 1,
-            'limit' => 6,
-            'order' => ['viewed' => 'desc']
-        );
-        return $postModel->getData($params);
-    }
+function getSpinTime($code){
+    $code = strtoupper($code);
+
+    $code = in_array($code, ['MAX3DPLUS', 'MAX3DPRO']) ? 'MAX3D' : $code;
+
+    $_this = &get_instance();
+    $_this->load->model('category_model');
+    $cateModel = new Category_model();
+    $spinTime = $cateModel->getSpinTime();
+
+    return isset($spinTime[$code]) ? $spinTime[$code] : [];
 }
 
-if (!function_exists('listGroupBy')) {
-    function listGroupBy($field){
-        $_this =& get_instance();
-        $_this->load->model(['post_model']);
-        $postModel = new Post_model();
-        return $postModel->listGroupBy($field);
+function getCatChildByDOW($parentId = 0, $dayOfWeek = null)
+{
+    $ci =& get_instance();
+    $ci->load->model('category_model');
+    $categoryModel = new Category_model();
+    $rs = [];
+    $_all_category = $categoryModel->_all_category();
+    $data = $categoryModel->getListChild($_all_category, $parentId);
+    if (!empty($data)) foreach ($data as $key => $item) {
+        if ($dayOfWeek !== null && strpos($item->weekday, "$dayOfWeek") !== false) {
+            $rs[] = $data[$key];
+        } else if ($dayOfWeek === null){
+            $rs = $data;
+        }
+    }
+    return $rs;
+}
+
+if (!function_exists('getCateByCode')) {
+    function getCateByCode($code)
+    {
+        $ci = &get_instance();
+        $ci->load->model(['category_model']);
+        $_data_category = new Category_model();
+        return $_data_category->getByField('code', $code);
     }
 }

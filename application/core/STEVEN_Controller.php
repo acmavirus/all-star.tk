@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ducto
- * Date: 05/12/2017
- * Time: 4:24 CH
- */
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class STEVEN_Controller extends CI_Controller
@@ -12,10 +6,12 @@ class STEVEN_Controller extends CI_Controller
     public $template_path = '';
     public $template_main = '';
     public $templates_assets = '';
-    public $settings = array();
+    public $template_include = '';
     public $_controller;
     public $_method;
     public $_memcache;
+    public $_settings;
+    public $_settings_social;
     public $_message = array();
 
     public function __construct()
@@ -24,19 +20,23 @@ class STEVEN_Controller extends CI_Controller
 
         //Load library
         $this->load->library(array('session', 'form_validation', 'user_agent'));
-        $this->load->helper(array('cookie', 'data', 'security', 'url','title', 'directory', 'file', 'form', 'datetime', 'language', 'debug', 'text'));
-        $this->config->load('languages');
+        $this->load->helper(array('cookie', 'data', 'security', 'url', 'directory', 'file', 'form', 'datetime', 'debug', 'text'));
+        //$this->config->load('languages');
         //Load database
         $this->load->database();
 
         $this->_controller = $this->router->fetch_class();
         $this->_method = $this->router->fetch_method();
-
         //load cache driver
         if (CACHE_MODE == TRUE) $this->load->driver('cache', array('adapter' => CACHE_ADAPTER, 'backup' => 'file', 'key_prefix' => CACHE_PREFIX_NAME));
-
     }
 
+    public function setCacheFile($timeOut = 1){
+        if (CACHE_FILE_MODE == TRUE) {
+            $this->output->cache($timeOut);
+        }
+    }
+    
     public function setCache($key, $data, $timeOut = 3600)
     {
         if (CACHE_MODE == TRUE) {
@@ -51,6 +51,7 @@ class STEVEN_Controller extends CI_Controller
         } else return false;
     }
 
+
     public function deleteCache($key = null)
     {
         if (CACHE_MODE == TRUE) {
@@ -60,6 +61,20 @@ class STEVEN_Controller extends CI_Controller
     }
 
 
+    public function delete_cache_file($url = ''){
+        if (empty($url)){
+            $this->load->helper('file');
+            $url = $this->input->get('url');
+        }
+
+        if(!empty($url)){
+            $uri = str_replace(base_url(),'/',$url);
+            $this->output->delete_cache($uri);
+        }else{
+            delete_files(FCPATH . 'application' . DIRECTORY_SEPARATOR . 'cache');
+        }
+
+    }
     public function checkRequestGetAjax()
     {
         if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) !== 'xmlhttprequest'))
@@ -96,10 +111,11 @@ class STEVEN_Controller extends CI_Controller
         $str = $this->toNormal($str);
         $str = preg_replace("/[^a-zA-Z0-9\/_|+ -]/", '', $str);
         $str = preg_replace("/( )/", '-', $str);
-        $str = str_replace('/', '', $str);
+        $str = str_replace('/', '-', $str);
         $str = str_replace("\/", '', $str);
         $str = str_replace("+", "", $str);
         $str = str_replace(" - ", "-", $str);
+        $str = str_replace("---", "-", $str);
         $str = strtolower($str);
         $str = stripslashes($str);
         return trim($str, '-');
@@ -123,108 +139,8 @@ class STEVEN_Controller extends CI_Controller
         $str = preg_replace("/(Đ)/", 'D', $str);
         return $str;
     }
-    private function getRandomProxy(){
-//        $keyCache = "my_proxy_random";
-//        $data = $this->getCache($keyCache);
-//        if(empty($data)){
-            $url = "http://pubproxy.com/api/proxy?api=b2J3ZmlOT0RRQy9jRWlndWo0R0RtQT09&format=json&google=true&speed=25&last_check=120&limit=1";
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_URL,$url);
-            $result=curl_exec($ch);
-            curl_close($ch);
-            $proxy = json_decode($result);
-            $tmp = [];
-            if(!empty($proxy->data)) foreach ($proxy->data as $item){
-                $tmp[] = $item->ipPort;
-            }
-            $data = $tmp;
-            //$this->setCache($keyCache,$data,60*60*5);
-//        }
-        return $data;
-    }
 
-    public function cUrl($url, array $post_data = array(), $delete = false, $verbose = false, $ref_url = false, $cookie_location = false, $return_transfer = true)
-    {
-        $pointer = curl_init();
-//        $proxy = $this->getRandomProxy();
-        $proxy = [
-            "178.63.239.228:3128","190.187.253.124:3128","69.197.181.202:3128","92.244.99.229:3128"
-        ];
-        curl_setopt($pointer, CURLOPT_URL, $url);
-//        $oneProxy = $proxy[rand(0,count($proxy)-1)];
-//        $oneProxy = "162.144.50.155:3838";
-//        echo $oneProxy."\n";
-//        if(!empty($proxy)) curl_setopt($pointer, CURLOPT_PROXY, $oneProxy);
-        curl_setopt($pointer, CURLOPT_TIMEOUT, 10);
-        curl_setopt($pointer, CURLOPT_RETURNTRANSFER, $return_transfer);
-        curl_setopt($pointer, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.10 (KHTML, like Gecko) Chrome/8.0.552.28 Safari/534.10");
-        curl_setopt($pointer, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($pointer, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($pointer, CURLOPT_HEADER, false);
-        curl_setopt($pointer, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($pointer, CURLOPT_AUTOREFERER, true);
-
-        if ($cookie_location !== false) {
-            curl_setopt($pointer, CURLOPT_COOKIEJAR, $cookie_location);
-            curl_setopt($pointer, CURLOPT_COOKIEFILE, $cookie_location);
-            curl_setopt($pointer, CURLOPT_COOKIE, session_name() . '=' . session_id());
-        }
-
-        if ($verbose !== false) {
-            $verbose_pointer = fopen($verbose, 'w');
-            curl_setopt($pointer, CURLOPT_VERBOSE, true);
-            curl_setopt($pointer, CURLOPT_STDERR, $verbose_pointer);
-        }
-
-        if ($ref_url !== false) {
-            curl_setopt($pointer, CURLOPT_REFERER, $ref_url);
-        }
-
-        if (count($post_data) > 0) {
-            curl_setopt($pointer, CURLOPT_POST, true);
-            curl_setopt($pointer, CURLOPT_POSTFIELDS, $post_data);
-        }
-        if ($delete !== false) {
-            curl_setopt($pointer, CURLOPT_CUSTOMREQUEST, "DELETE");
-        }
-
-        $return_val = curl_exec($pointer);
-
-        $http_code = curl_getinfo($pointer, CURLINFO_HTTP_CODE);
-
-        if ($http_code == 404) {
-            return false;
-        }
-
-        curl_close($pointer);
-
-        unset($pointer);
-
-        return $return_val;
-    }
-
-    public function callCURL($url, $data = array(), $type = "GET")
-    {
-        $resource = curl_init();
-        curl_setopt($resource, CURLOPT_URL, $url);
-//        curl_setopt($resource, CURLOPT_PROXY, "185.134.23.196:80");
-        curl_setopt($resource, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($resource, CURLOPT_SSL_VERIFYPEER, false);
-
-        if ($type == "POST") {
-            curl_setopt($resource, CURLOPT_POST, true);
-            curl_setopt($resource, CURLOPT_POSTFIELDS, http_build_query($data));
-        }
-        curl_setopt($resource, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($resource, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($resource, CURLOPT_TIMEOUT, 40);
-        $httpcode = curl_getinfo($resource, CURLINFO_HTTP_CODE);
-        $result = curl_exec($resource);
-        curl_close($resource);
-        return $result;
-    }
-
+    
     public function encrypt_decrypt($action, $string)
     {
         $output = false;
@@ -244,6 +160,17 @@ class STEVEN_Controller extends CI_Controller
         }
         return $output;
     }
+    public function array_group_by(array $arr, callable $key_selector)
+    {
+        $result = array();
+        foreach ($arr as $i) {
+            $key = call_user_func($key_selector, $i);
+            $result[$key][] = $i;
+        }
+        return $result;
+    }
+
+
 }
 
 class Admin_Controller extends STEVEN_Controller
@@ -254,62 +181,60 @@ class Admin_Controller extends STEVEN_Controller
         parent::__construct();
 
         //set đường dẫn template
-        $this->template_path = 'admin/';
-        $this->template_main = $this->template_path . '_layout';
-        $this->templates_assets = base_url() . 'public/admin/';
+        define("TEMPLATE_PATH","admin/");
+        define("TEMPLATE_MAIN",TEMPLATE_PATH . '_layout');
+        define("TEMPLATE_ASSET",base_url('public/admin/'));
 
         //Language
-        $this->switchLanguage($this->input->get('lang'));
+        // $this->switchLanguage($this->input->get('lang'));
+
 
         //tải thư viện
         $this->load->library(array('ion_auth', 'breadcrumbs'));
         //load helper
-        $this->load->helper(array('authorization', 'image', 'format', 'link','button'));
+        $this->load->helper(array('authorization', 'banner','image','format', 'link','button'));
         //Load config
         $this->config->load('seo');
         $this->config->load('permission');
-        $this->config->load('domain');
-
-        /*$configMinify['assets_dir'] = 'public/admin';
-        $configMinify['assets_dir_css'] = 'public/admin/css';
-        $configMinify['assets_dir_js'] = 'public/admin/js';
-        $configMinify['css_dir'] = 'public/admin/css';
-        $configMinify['js_dir'] = 'public/admin/js';
-        $this->load->library('minify', $configMinify);
-        $this->minify->enabled = FALSE;*/
 
         $this->check_auth();
     }
 
     public function check_auth()
     {
-        //dd($this->session->userdata());
         if (
             ($this->_controller !== 'user' || ($this->_controller === 'user' && !in_array($this->_method, ['login', 'ajax_login','logout'])))
-            && !$this->ion_auth->logged_in()) {
+            && empty($this->ion_auth->logged_in())) {
             //chưa đăng nhập thì chuyển về page login
             redirect(site_admin_url('user/login') . '?url=' . urlencode(current_url()), 'refresh');
         } else {
             if ($this->ion_auth->logged_in()) {
-                //if ($this->session->admin_group_id === 2) redirect(site_url());
                 if ($this->ion_auth->in_group(1) != true) {
                     if (!$this->session->admin_permission) {
                         $this->load->model('Groups_model', 'group');
                         $groupModel = new Groups_model();
                         $group = $groupModel->get_group_by_userid((int)$this->session->userdata('user_id'));
-                        $data = $groupModel->getById($group->group_id);
+                        $data = (!empty($group)) ? $groupModel->getById($group->group_id) : array();
+
                         if (!empty($data)) {
                             $this->session->admin_permission = json_decode($data->permission, true);
                             $this->session->admin_group_id = (int)$group->group_id;
                         }
                     }
-                    if (!in_array($this->_controller, array('dashboard')) && $this->_method !== 'logout') {
-                        if (!$this->session->admin_permission[$this->_controller]['view']) {//check quyen view
-                            $this->load->view($this->template_main, ['main_content' => $this->load->view($this->template_path.'not_permission', [], TRUE)]);
+
+                    if (!in_array($this->_controller, array('dashboard'))
+                        && $this->_method !== 'logout'
+                        && $this->_method !== 'profile'
+                        && empty($_SERVER['HTTP_X_REQUESTED_WITH'])
+                    ) {
+                        if (empty($this->session->admin_permission[$this->_controller]['view'])) {//check quyen view
+                            $this->load->view($this->template_main, ['main_content' => $this->load->view(TEMPLATE_PATH.'not_permission', [], TRUE)]);
                         }
+
                     }
                 } else {
                     $this->session->admin_group_id = 1;//ID nhóm admin
+
                 }
             }
 
@@ -317,91 +242,277 @@ class Admin_Controller extends STEVEN_Controller
         }
     }
 
-    public function switchLanguage($lang_code = "")
-    {
+
+    public function switchLanguage($lang_code = "") {
         $language_code = !empty($lang_code) ? $lang_code : $this->config->item('language_default');
         $this->session->set_userdata('admin_lang', $language_code);
         $languageFolder = $this->config->item('language_folder')[$language_code];
         $this->session->set_userdata('admin_lang_folder', $languageFolder);
+
         if (!empty($lang_code)) redirect($_SERVER['HTTP_REFERER']);
     }
 
     // add log action
-    public function addLogAction($action, $note)
+    public function addLogAction($module,$data,$module_id,$note,$action)
     {
-        $this->load->model("Log_action_model");
-        $logActionModel = new Log_action_model();
-        $data['action'] = $action;
-        $data['note'] = $note;
-        $data['uid'] = $this->session->user_id;
-        $logActionModel->save($data);
+        $this->load->model("logs_model");
+        $logActionModel = new Logs_model();
+        $data_store = [
+            'module' => $module,
+            'ip' => $this->input->ip_address(),
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+            'module_id' => $module_id,
+            'note' => $note,
+            'action' => $action,
+            'uid' => $this->session->user_id,
+            'data' => json_encode($data)
+        ];
+        $logActionModel->save($data_store);
+    }
+
+
+
+}
+
+class Public_Controller extends STEVEN_Controller
+{
+
+    public $schemas;
+    public function __construct() {
+        parent::__construct();
+        //tải thư viện
+        $this->load->library(array('breadcrumbs','schema'));
+
+        //load helper
+        $this->load->helper(array('navmenus', 'banner', 'cookie','link', 'title', 'format', 'image', 'download'));
+
+        if(MAINTAIN_MODE == TRUE) $this->load->view('public/coming_soon');
+
+        $this->_settings        = getSetting('data_seo');
+        $this->_settings_social = getSetting('data_social');
+        $this->_settings_email  = getSetting('data_email');
+
+        $configBreadcrumb['crumb_divider'] = $this->config->item('frontend_crumb_divider');
+        $configBreadcrumb['tag_open'] = $this->config->item('frontend_tag_open');
+        $configBreadcrumb['tag_close'] = $this->config->item('frontend_tag_close');
+        $configBreadcrumb['crumb_open'] = $this->config->item('frontend_crumb_open');
+        $configBreadcrumb['crumb_first_open'] = $this->config->item('frontend_crumb_first_open');
+        $configBreadcrumb['crumb_last_open'] = $this->config->item('frontend_crumb_last_open');
+        $configBreadcrumb['crumb_close'] = $this->config->item('frontend_crumb_close');
+        $this->breadcrumbs->init($configBreadcrumb);
+        $this->form_validation->set_error_delimiters('<span class="text-danger">', '</span>');
+
+        if (DEBUG_MODE == TRUE && !in_array($this->_controller,['seo','player'])) {
+            if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) !== 'xmlhttprequest')) {
+                $this->load->add_package_path(APPPATH . 'third_party', 'codeigniter-debugbar');
+                $this->output->enable_profiler(TRUE);
+            }
+        }
+
+    }
+
+    private function _301_direction(){
+        $slug = str_replace(base_url(),"",current_url());
+        $data_301 = getSetting('data_301');
+        $data = explode("\n",$data_301->content);
+        $content = [];
+        if(!empty($data)) foreach ($data as $item){
+            $rs = array_map('trim', explode("|",$item));
+            if(!empty($rs[0] && !empty($rs[1])))
+                $content[$rs[0]] = $rs[1];
+        }
+        if(!empty($content[$slug])) redirect($content[$slug],"location","301");
+    }
+
+    private function check301Old(){
+        $slug = str_replace(base_url(),"",current_url());
+        $this->load->model('post_model');
+        $postModel = new Post_model();
+        if($onePost = $postModel->getBySlug($slug)) redirect(getUrlPost($onePost),"location","301");
+    }
+
+
+
+    public function switchLanguage($lang_code = "")
+    {
+        $language_code = !empty($lang_code) ? $lang_code : $this->config->item('language_default');
+        $this->session->set_userdata('public_lang_code', $language_code);
+        $languageFolder = $this->config->item('public_lang_folder')[$language_code];
+        $this->session->set_userdata('admin_lang_folder', $languageFolder);
+        if (!empty($lang_code)) redirect($_SERVER['HTTP_REFERER']);
+    }
+
+    public function getUrlLogin()
+    {
+        $url = $this->zalo->getUrlLogin();
+        return $url;
+    }
+
+
+
+    function alpha_numeric_space($str)
+    {
+        if (preg_match('/[\'\/~`\!@#\$%\^&\*\(\)_\+=\{\}\[\]\|;:"\<\>\.\?\\\]/', $str)) {
+            $this->form_validation->set_message('alpha_numeric_space', '%s không được chứa ký tự đặc biệt');
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @return array A CSRF key-value pair
+     */
+    public function _get_csrf_nonce()
+    {
+        $this->load->helper('string');
+        $key = random_string('alnum', 8);
+        $value = random_string('alnum', 20);
+        $this->session->set_flashdata('csrfkey', $key);
+        $this->session->set_flashdata('csrfvalue', $value);
+        return array($key => $value);
+    }
+
+    /**
+     * @return bool Whether the posted CSRF token matches
+     */
+    public function _valid_csrf_nonce()
+    {
+        $csrfkey = $this->input->post($this->session->flashdata('csrfkey'));
+        if ($csrfkey && $csrfkey === $this->session->flashdata('csrfvalue')) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
+
+    public function sendMail($to_mail, $subject, $contentHtml, $emailToCC = '', $emailToBCC = '')
+    {
+        try {
+            $this->load->library('email');
+            if (!empty($this->settings['protocol'])) {
+                $this->email->protocol = $this->settings['protocol'];
+                $this->email->smtp_host = $this->settings['smtp_host'];
+                $this->email->smtp_user = $this->settings['smtp_user'];
+                $this->email->smtp_port = $this->settings['smtp_port'];
+            }
+            if (!empty($this->settings['email_admin'])) {
+                $from_mail = $this->settings['email_admin'];
+            } else {
+                $from_mail = $this->email->smtp_user;
+            }
+            $this->email->from($from_mail);
+            $this->email->to($to_mail);
+            if (!empty($emailToCC)) $this->email->cc($emailToCC);
+            if (!empty($emailToBCC)) $this->email->bcc($emailToBCC);
+            $this->email->subject($subject);
+            $this->email->message($contentHtml);
+            if ($this->email->send()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception $e) {
+            $this->_message = array(
+                'type' => 'danger',
+                'message' => 'Co lỗi khi gửi mail'
+            );
+        }
+    }
+    public function callCURL($url, $data = array(), $type = "GET")
+    {
+        $resource = curl_init();
+        curl_setopt($resource, CURLOPT_URL, $url);
+
+        if ($type == "POST") {
+            curl_setopt($resource, CURLOPT_POST, true);
+            curl_setopt($resource, CURLOPT_POSTFIELDS, http_build_query($data));
+        }
+        curl_setopt($resource, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($resource, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($resource, CURLOPT_TIMEOUT,40);
+        $result = curl_exec($resource);
+        curl_close($resource);
+        return $result;
+    }
+
+    public function _replace_content($content = '')
+    {
+        $content = html_entity_decode($content);
+
+        if (preg_match('/\[xsmb\]/', $content)) {
+            $data_json_MB = json_decode($this->callCURL(API_DATACENTER . 'result/getdataresult?api_id=1&limit=1'), true);
+            $data['data_MB'] = (!empty($data_json_MB) && !empty($data_json_MB['data']['data'])) ? $data_json_MB['data']['data'][0] : array();
+            if (!empty($data['data_MB'])) $data['oneParentMB'] = $data['oneItem'] = getCateById($data['data_MB']['category_id']);
+
+            $table_xsmb = $this->load->view(TEMPLATE_PATH . 'lottery/_table_detail_single', $data, true);
+            $content = str_replace('[xsmb]', $table_xsmb, $content);
+        }
+        if (preg_match('/\[xsmt\]/', $content)) {
+            $data_json_MT = json_decode($this->callCURL(API_DATACENTER . 'result/getdataresult?api_id=2&limit=3'), true);
+            $dataApiMT = (!empty($data_json_MT)) ? groupDisTime($data_json_MT['data']['data']) : array();
+            $data_MT = reset($dataApiMT);
+            if (!empty($data_MT)) $oneItem = getCateById($data_MT[0]['category_id']);
+            if (!empty($oneItem)) $oneParentMT = getCateById($oneItem->parent_id);
+
+            $table_xsmt = $this->load->view(TEMPLATE_PATH.'lottery/_table_detail_multi', ['data_MT_MN' => $data_MT, 'oneParent' => $oneParentMT], true);
+            $content = str_replace('[xsmt]', $table_xsmt, $content);
+        }
+        if (preg_match('/\[xsmn\]/', $content)) {
+            $data_json_MN = json_decode($this->callCURL(API_DATACENTER . 'result/getdataresult?api_id=3&limit=1'), true);
+            $dataApiMN = (!empty($data_json_MN)) ? groupDisTime($data_json_MN['data']['data']) : array();
+            $data_MN = reset($dataApiMN);
+            if (!empty($data_MN)) $oneItem = getCateById($data_MN[0]['category_id']);
+            if (!empty($oneItem)) $oneParentMN = getCateById($oneItem->parent_id);
+
+            $table_xsmn = $this->load->view(TEMPLATE_PATH.'lottery/_table_detail_multi', ['data_MT_MN' => $data_MN, 'oneParent' => $oneParentMN], true);
+            $content = str_replace('[xsmn]', $table_xsmn, $content);
+        }
+
+        return $content;
     }
 
 }
 
-class API_Controller extends yidas\rest\Controller
+class Crawler_Controller extends CI_Controller
 {
-    const RESPONSE_SUCCESS = 200;
-    const RESPONSE_EXIST = 201;
-    const RESPONSE_REQUEST_ERROR = 400;
-    const RESPONSE_LOGIN_ERROR = 401;
-    const RESPONSE_LOGIN_DENIED = 403;
-    const RESPONSE_NOT_EXIST = 404;
-    const RESPONSE_LIMITED = 406;
-    const RESPONSE_SERVER_ERROR = 500;
-
     public function __construct()
     {
         parent::__construct();
-        $this->load->library(['form_validation','session']);
-        $this->load->helper(array('security','debug','link'));
         $this->load->database();
-        //$this->load->driver('cache');
-        //log_message('error',"Log API => ".json_encode($_REQUEST));
-        //$this->memcache_obj = new Memcache;
-        //$this->memcache_obj->connect(MEM_HOST, MEM_PORT);
-        $this->form_validation->set_error_delimiters('', '');
-        //$this->checkAuth();
-
-        if (CACHE_MODE == TRUE) $this->load->driver('cache', array('adapter' => CACHE_ADAPTER, 'backup' => 'file', 'key_prefix' => CACHE_PREFIX_NAME));
-
+        $this->load->library(array('session', 'form_validation'));
+        $this->load->helper(array('security', 'url', 'form', 'debug', 'data'));
     }
 
-    public function setCache($key, $data, $timeOut = 3600)
+    public function checkRequestGetAjax()
     {
-        if (CACHE_MODE == TRUE) {
-            $this->cache->save($key, $data, $timeOut);
-        }
+        if ($this->input->server('REQUEST_METHOD') !== 'GET')
+            die('Not Allow');;
     }
 
-    public function getCache($key)
+    public function checkRequestPostAjax()
     {
-        if (CACHE_MODE == TRUE) {
-            return $this->cache->get($key);
-        } else return false;
+        if ($this->input->server('REQUEST_METHOD') !== 'POST')
+            die('Not Allow');
     }
 
-    private function checkAuth(){
-        $arrAuth = [
-            ['admin','admin'],
-            ['user1','admin365!@#']
-        ];
-        $arrIP = ['127.0.0.1'];
-        $ipClient = $this->input->ip_address();
-        if(!in_array($this->request->getAuthCredentialsWithBasic(),$arrAuth) || !in_array($ipClient,$arrIP)){
-            $dataJson = $this->pack([], self::RESPONSE_LOGIN_DENIED, 'Not permission !');
-            return $this->response->json($dataJson);
-        }
+    public function returnJsonData($data)
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        die(json_encode($data));
     }
+
     public function toSlug($doc)
     {
         $str = addslashes(html_entity_decode($doc));
         $str = $this->toNormal($str);
+        $str = str_replace(":", "-gio-", $str);
         $str = preg_replace("/[^a-zA-Z0-9\/_|+ -]/", '', $str);
         $str = preg_replace("/( )/", '-', $str);
-        $str = str_replace('/', '', $str);
+        $str = str_replace('/', '-', $str);
         $str = str_replace("\/", '', $str);
         $str = str_replace("+", "", $str);
+        $str = str_replace(" - ", "-", $str);
+        $str = str_replace("---", "-", $str);
         $str = strtolower($str);
         $str = stripslashes($str);
         return trim($str, '-');
@@ -425,103 +536,67 @@ class API_Controller extends yidas\rest\Controller
         $str = preg_replace("/(Đ)/", 'D', $str);
         return $str;
     }
-    public function cUrl($url, array $post_data = array(), $delete = false, $verbose = false, $ref_url = false, $cookie_location = false, $return_transfer = true)
-    {
-        $return_val = false;
-        $pointer = curl_init();
 
-        curl_setopt($pointer, CURLOPT_URL, $url);
-        curl_setopt($pointer, CURLOPT_TIMEOUT, 40);
-        curl_setopt($pointer, CURLOPT_RETURNTRANSFER, $return_transfer);
-        curl_setopt($pointer, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.10 (KHTML, like Gecko) Chrome/8.0.552.28 Safari/534.10");
-        curl_setopt($pointer, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($pointer, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($pointer, CURLOPT_HEADER, false);
-        curl_setopt($pointer, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($pointer, CURLOPT_AUTOREFERER, true);
+    public function copyFile($from,$to){
+//        $url = 'https://static.bongda24h.vn/medias/standard/2020/6/27/nhan-dinh-bong-da-Leeds-vs-Fulham.jpg';
+//        $img = MEDIA_PATH.'thumb/post/cai-ten-dac-biet.jpg';
 
-        if ($cookie_location !== false) {
-            curl_setopt($pointer, CURLOPT_COOKIEJAR, $cookie_location);
-            curl_setopt($pointer, CURLOPT_COOKIEFILE, $cookie_location);
-            curl_setopt($pointer, CURLOPT_COOKIE, session_name() . '=' . session_id());
-        }
-
-        if ($verbose !== false) {
-            $verbose_pointer = fopen($verbose, 'w');
-            curl_setopt($pointer, CURLOPT_VERBOSE, true);
-            curl_setopt($pointer, CURLOPT_STDERR, $verbose_pointer);
-        }
-
-        if ($ref_url !== false) {
-            curl_setopt($pointer, CURLOPT_REFERER, $ref_url);
-        }
-
-        if (count($post_data) > 0) {
-            curl_setopt($pointer, CURLOPT_POST, true);
-            curl_setopt($pointer, CURLOPT_POSTFIELDS, $post_data);
-        }
-        if ($delete !== false) {
-            curl_setopt($pointer, CURLOPT_CUSTOMREQUEST, "DELETE");
-        }
-
-        $return_val = curl_exec($pointer);
-
-        $http_code = curl_getinfo($pointer, CURLINFO_HTTP_CODE);
-
-        if ($http_code == 404) {
-            return false;
-        }
-
-        curl_close($pointer);
-
-        unset($pointer);
-
-        return $return_val;
+        $ch = curl_init($from);
+        $fp = fopen($to, 'wb');
+        curl_setopt($ch, CURLOPT_FILE, $fp);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_exec($ch);
+        curl_close($ch);
+        fclose($fp);
     }
 
-    function array_group_by(array $data, $key) : array
+    public function callCURL($url, $data = array(), $type = "GET")
     {
-        if (!is_string($key) && !is_int($key) && !is_float($key) && !is_callable($key)) {
-            trigger_error('array_group_by(): The key should be a string, an integer, a float, or a function', E_USER_ERROR);
+        $resource = curl_init();
+        curl_setopt($resource, CURLOPT_URL, $url);
+
+        if ($type == "POST") {
+            curl_setopt($resource, CURLOPT_POST, true);
+            curl_setopt($resource, CURLOPT_POSTFIELDS, http_build_query($data));
         }
-
-        $isFunction = !is_string($key) && is_callable($key);
-
-        // Load the new array, splitting by the target key
-        $grouped = [];
-        foreach ($data as $value) {
-            $groupKey = null;
-
-            if ($isFunction) {
-                $groupKey = $key($value);
-            } else if (is_object($value)) {
-                $groupKey = $value->{$key};
-            } else {
-                $groupKey = $value[$key];
-            }
-
-            $grouped[$groupKey][] = $value;
-        }
-
-        // Recursively build a nested grouping if more parameters are supplied
-        // Each grouped array value is grouped according to the next sequential key
-        if (func_num_args() > 2) {
-            $args = func_get_args();
-
-            foreach ($grouped as $groupKey => $value) {
-                $params = array_merge([$value], array_slice($args, 2, func_num_args()));
-                $grouped[$groupKey] = call_user_func_array(array($this, "array_group_by"), $params);
-            }
-        }
-
-        return $grouped;
+        curl_setopt($resource, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($resource, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($resource,CURLOPT_TIMEOUT,40);
+        $result = curl_exec($resource);
+        curl_close($resource);
+        return $result;
     }
-
-    public function deleteCache($key = null)
+    public function cleanContent($content)
     {
-        if (CACHE_MODE == TRUE) {
-            if (!empty($key)) return $this->cache->delete($key);
-            else return $this->cache->clean();
-        } else return false;
+        if(empty($content)) return false;
+        $remove = [
+          '/id=".*?"/',
+          '/\!important/',
+          '/<script.*?script>/',
+          '/<iframe.*?\/iframe>/',
+          '/<video.*?\/video>/',
+          '/<img(?![^>]*(src="[^"]+"))[^>]*>/'
+        ];
+        $content = preg_replace($remove, '', $content);
+        $content = strip_tags($content, '<img><h2><h3><h4><p><span><strong><br><table><th><tr><td><ol><ul><li>');
+        /*xoa the font*/
+        /*        $content = preg_replace('/<font.*?>(.*?)<\/font>/', '$1', $content);*/
+        /*xoa class lazy*/
+//        $content = preg_replace('/(class=".*?)lazy(.*?")/', '$1$2', $content);
+        /*remove*/
+        return $content;
+    }
+    public function downloadImage($link,$name = '', $folder = ''){
+        $link = strtok($link, '?');
+        $ext = pathinfo($link, PATHINFO_EXTENSION);
+        if(empty($name)) $name = $this->toSlug(pathinfo($link, PATHINFO_FILENAME));
+        $fileName = $folder . "/" . $name . '.' . (!empty($ext) ? $ext : 'png');
+        if (file_exists(MEDIA_PATH . $fileName) == false) {
+            if (!is_dir(dirname(MEDIA_PATH . $fileName))) {
+                mkdir(dirname(MEDIA_PATH . $fileName), 0755, TRUE);
+            }
+            file_put_contents(MEDIA_PATH . $fileName, file_get_contents($link));
+            return $fileName;
+        } else return $fileName;
     }
 }

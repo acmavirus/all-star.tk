@@ -12,13 +12,11 @@ $(document).ready(function() {
 
     $('.btnShowMenu').click(function () {
         var locationId = $('#menu_locations').val();
-        var lang_code = $('#menu_languages').val();
         var elment = $(this);
-        console.log(lang_code);
         $.ajax({
-            type: 'POST',
+            type: "POST",
             url: url_ajax_load,
-            data:{location_id: locationId,lang_code:lang_code},
+            data:{location_id: locationId},
             dataType: 'html',
             beforeSend: function () {
                 elment.find('.fa-spinner').show();
@@ -30,7 +28,7 @@ $(document).ready(function() {
                     allowClear: true,
                     placeholder: 'Select an item'
                 });
-                showmenus(locationId,lang_code);
+                showmenus(locationId);
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 console.log(xhr);
@@ -77,8 +75,9 @@ $(document).ready(function() {
         _this.prop('disabled', true);
         var menu = paneActive.find('select option:selected').val();
         var menuName = $.trim(paneActive.find('select option:selected').text());
+        var value_id = $.trim(paneActive.find('select option:selected').attr('value-id'));
         var menuType = paneActive.find('input[name="type"]').val();
-        $('#nestable > ol.dd-list').append('<li class="dd-item dd3-item" data-id="0" data-link="' + menu + '" data-label="' + menuName + '" data-cls=""><div class="dd-handle dd3-handle"></div><div class="dd3-content">' + menuName + '</div><div class="action-item"><span class="nestleeditd fa fa-pencil"></span> <span class="nestledeletedd fa fa-trash"></span></div>' + navmenuitemeditor() + '</li>');
+        $('#nestable > ol.dd-list').append('<li class="dd-item dd3-item" data-value="'+value_id+'" data-id="0" data-link="' + menu + '" data-label="' + menuName + '" data-cls=""><div class="dd-handle dd3-handle"></div><div class="dd3-content">' + menuName + '</div><div class="action-item"><span class="nestleeditd fa fa-pencil"></span> <span class="nestledeletedd fa fa-trash"></span></div>' + navmenuitemeditor() + '</li>');
         $('#nestable').nestable();
         var locationId = $('#menu_locations').val();
         var lang_code = $('#menu_languages').val();
@@ -138,9 +137,10 @@ $(document).ready(function() {
     });
 
     $(document).on('click', '.btnSaveMenu', function () {
-        var locationId = $('#menu_locations').val();
-        var lang_code = $('#menu_languages').val();
-        var structure = $('#nestable').nestable('serialize');
+        var locationId  = $('#menu_locations').val();
+        var lang_code   = $('#menu_languages').val();
+        // var value_id    = $('#menu_languages').val();
+        var structure   = $('#nestable').nestable('serialize');
         if(structure.length == 0){
             toastr['error']("Bạn chưa chọn Menu !");
             return false;
@@ -151,11 +151,11 @@ $(document).ready(function() {
 });
 
 
-function showmenus(locationId, lang_code) {
+function showmenus(locationId) {
     $.ajax({
         type: "POST",
         url: url_ajax_load_menu,
-        data: {location_id:locationId, lang_code:lang_code},
+        data: {location_id:locationId},
         dataType: "json",
         cache: "false",
         success: function (result) {
@@ -172,7 +172,7 @@ function _recursive_menu(data, parent_id) {
     var _child = '';
     if(data) $.each(data, function (i,v) {
         if(v && parseInt(v.level) == parseInt(parent_id)){
-            contentMenu += '<li class="dd-item" data-label="' + v.name + '" data-id="' + v.id + '" data-link="' + v.link + '" data-cls="' + v.class + '"><div class="dd-handle dd3-handle"></div> <div class="dd3-content">' + v.name + '</div><div class="action-item"><span class="nestleeditd fa fa-pencil"></span> <span class="nestledeletedd fa fa-trash"></span></div>' + navmenuitemeditor();
+            contentMenu += '<li class="dd-item" data-label="' + v.name + '" data-value="'+v.data_id+'" data-id="' + v.id + '" data-link="' + v.link + '" data-cls="' + v.class + '"><div class="dd-handle dd3-handle"></div> <div class="dd3-content">' + v.name + '</div><div class="action-item"><span class="nestleeditd fa fa-pencil"></span> <span class="nestledeletedd fa fa-trash"></span></div>' + navmenuitemeditor();
             _child =  _recursive_menu(data, parseInt(v.id));
             if(_child) contentMenu += '<ol class="dd-list">';
             contentMenu += _child;
@@ -186,7 +186,7 @@ function _recursive_menu(data, parent_id) {
 }
 
 function navmenuitemeditor(id) {
-    var editorelement = '<div class="menublock" style="display: none"><input type="text" class="form-control requiredfields mname" required="required" value="" maxlength="75" placeholder="aaaa"><input type="text" class="form-control requiredfields mtarget" required="required" value="" maxlength="255" placeholder="target"><input type="text" class="form-control mclass" value="" maxlength="255" placeholder="class"><br/><input type="button" class="btn btn-theme updatenavmenu" value="Update" /><a href="#" class="cancelnavmenu">Cancel<a/></div>'
+    var editorelement = '<div class="menublock" style="display: none"><input type="text" class="form-control requiredfields mname" required="required" value="" maxlength="225" placeholder="Text"><input type="text" class="form-control requiredfields mtarget" required="required" value="" maxlength="255" placeholder="target"><input type="text" class="form-control mclass" value="" maxlength="255" placeholder="class"><br/><input type="button" class="btn btn-theme updatenavmenu" value="Update" /><a href="#" class="cancelnavmenu">Cancel<a/></div>'
 
     return editorelement;
 }
@@ -197,9 +197,6 @@ function hidemenueditingblock() {
 }
 
 function saveData(structure, loc, lang){
-    console.log(structure);
-    console.log(loc);
-    console.log(lang);
     $.ajax({
         type: "POST",
         url: url_ajax_save_menu,

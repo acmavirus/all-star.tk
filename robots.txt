@@ -1,2 +1,5 @@
 User-agent: *
-Disallow: /
+Disallow: /cdn-cgi/*
+Disallow: /spincontent/*
+Allow: /
+Sitemap: https://xoso3m.com/sitemap.xml

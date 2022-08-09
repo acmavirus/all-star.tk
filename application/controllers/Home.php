@@ -1,18 +1,17 @@
 <?php
-
-/**
- * Created by PhpStorm.
- * User: ducto
- * Date: 9/29/2018
- * Time: 12:38 PM
- */
-
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Home extends STEVEN_Controller
+class Home extends Public_Controller
 {
-	public function index()
-	{
-		$this->load->view('default/layout', []);
-	}
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    public function index()
+    {
+        $data = [];
+        $data['main_content'] = $this->load->view(TEMPLATE_PATH . 'home/index', $data, TRUE);
+        $this->load->view(TEMPLATE_MAIN, $data);
+    }
 }

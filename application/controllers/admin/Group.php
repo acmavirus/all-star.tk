@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ducto
- * Date: 9/29/2018
- * Time: 12:38 PM
- */
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Group extends Admin_Controller
@@ -14,7 +8,6 @@ class Group extends Admin_Controller
   public function __construct()
   {
     parent::__construct();
-    //$this->lang->load('group');
     $this->load->model(['groups_model']);
     $this->_data = new Groups_model();
   }
@@ -24,8 +17,8 @@ class Group extends Admin_Controller
     $data['heading_title'] = "Quản lý nhóm";
     $data['heading_description'] = 'Danh sách nhóm quyền';
     $data['controllers'] = glob(APPPATH . "controllers" . DIRECTORY_SEPARATOR . "admin" . DIRECTORY_SEPARATOR . "*.php");
-    $data['main_content'] = $this->load->view($this->template_path . $this->_controller . DIRECTORY_SEPARATOR . $this->_method, $data, TRUE);
-    $this->load->view($this->template_main, $data);
+    $data['main_content'] = $this->load->view(TEMPLATE_PATH . $this->_controller . DIRECTORY_SEPARATOR . $this->_method, $data, TRUE);
+    $this->load->view(TEMPLATE_MAIN, $data);
   }
 
   public function ajax_list()
@@ -95,6 +88,8 @@ class Group extends Admin_Controller
     $data = $this->_convertData();
     unset($data['group_id']);
     if ($id = $this->_data->save($data)) {
+      $note   = 'Thêm group có id là : '.$id;
+      $this->addLogaction('group',$data,$id,$note,'Add');
       $message['type'] = 'success';
       $message['message'] = "Thêm mới thành công !";
     } else {
@@ -119,7 +114,15 @@ class Group extends Admin_Controller
   {
     $this->checkRequestPostAjax();
     $data = $this->_convertData();
+    if ($data['id'] == 1) {
+      $message['type'] = 'error';
+      $message['message'] = "Bạn không được cập nhật bản ghi này!";
+      $this->returnJson($message);
+    }
+    $data_old = $this->_data->single(['id' => $data['id']],$this->_data->table);
     if ($this->_data->update(['id' => $data['id']], $data, $this->_data->table)) {
+      $note   = 'Update group có id là : '.$data['id'];
+      $this->addLogaction('group',$data_old,$data['id'],$note,'Update');
       $message['type'] = 'success';
       $message['message'] = "Cập nhật thành công !";
     } else {
@@ -133,17 +136,24 @@ class Group extends Admin_Controller
   {
     $this->checkRequestPostAjax();
     $id = $this->input->post('id');
-    $field = $this->input->post('field');
-    $value = $this->input->post('value');
-    $response = $this->_data->update(['id' => $id], [$field => $value]);
-    if ($response != false) {
-      $message['type'] = 'success';
-      $message['message'] = "Cập nhật thành công !";
-    } else {
+    if ($id == 1) {
       $message['type'] = 'error';
-      $message['message'] = "Cập nhật thất bại !";
+      $message['message'] = "Bạn không được cập nhật bản ghi này!";
+      $this->returnJson($message);
+    }else{
+      $field = $this->input->post('field');
+      $value = $this->input->post('value');
+      $response = $this->_data->update(['id' => $id], [$field => $value]);
+      if ($response != false) {
+        $message['type'] = 'success';
+        $message['message'] = "Cập nhật thành công !";
+      } else {
+        $message['type'] = 'error';
+        $message['message'] = "Cập nhật thất bại !";
+      }
+      $this->returnJson($message);
     }
-    $this->returnJson($message);
+    
   }
 
   public function ajax_delete()

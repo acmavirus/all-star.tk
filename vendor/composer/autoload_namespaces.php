@@ -6,7 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'stringEncode' => array($vendorDir . '/paquettg/string-encode/src'),
     'org\\bovigo\\vfs' => array($vendorDir . '/mikey179/vfsstream/src/main/php'),
     'Composer\\Installer' => array($vendorDir . '/compwright/codeigniter-installers/src'),
 );

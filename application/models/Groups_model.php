@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ducto
- * Date: 10/2/2018
- * Time: 11:43 PM
- */
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Groups_model extends STEVEN_Model
@@ -15,7 +9,7 @@ class Groups_model extends STEVEN_Model
         $this->table = "groups";
         $this->table_relation = 'users_groups';
         $this->column_order = array("$this->table.id", "$this->table.id", "title", "$this->table.is_status", "$this->table.created_time", "$this->table.updated_time");
-        $this->column_search = array("title");
+        $this->column_search = array("name");
         $this->order_default = array("$this->table.created_time" => "DESC");
 
     }

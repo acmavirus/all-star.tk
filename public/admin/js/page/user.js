@@ -14,8 +14,8 @@ $(function() {
         sortable: 'asc',
         filterable: !1,
     }, {
-        field: "username",
-        title: "User Name"
+        field: "allias_name",
+        title: "Bí danh"
     }, {
         field: "fullname",
         title: "Full Name"
@@ -32,27 +32,24 @@ $(function() {
             return '<span data-field="active" data-value="'+(t.is_status == 1 ? 0 : 1)+'" class="m-badge ' + e[t.is_status].class + ' m-badge--wide btnUpdateField">' + e[t.is_status].title + "</span>"
         }
     }, {
-        field: "updated_time",
-        title: "Updated Time",
-        type: "date",
-        textAlign: "center",
-        format: "MM/DD/YYYY"
-    }, {
-        field: "created_time",
-        title: "Created Time",
-        type: "date",
-        textAlign: "center",
-        format: "MM/DD/YYYY"
-    }, {
         field: "action",
-        width: 110,
+        width: 250,
         title: "Actions",
         sortable: !1,
         overflow: "visible",
         template: function (t, e, a) {
-            return '' +
-                '<a href="javascript:;" class="m-portlet__nav-link btn m-btn m-btn--hover-accent m-btn--icon m-btn--icon-only m-btn--pill btnEdit" title="Edit"><i class="la la-edit"></i></a>' +
-                '<a href="javascript:;" class="m-portlet__nav-link btn m-btn m-btn--hover-danger m-btn--icon m-btn--icon-only m-btn--pill btnDelete" title="Delete"><i class="la la-trash"></i></a>'
+            content = `<li class="m-nav__item"><span class="m-nav__link">
+            <i class="m-nav__link-icon flaticon-avatar"></i><span class="m-nav__link-text"> Quyền &nbsp;&nbsp; : <strong >${t.permission}</strong></span></span></li>
+            <li class="m-nav__item"><span class="m-nav__link">
+            <i class="m-nav__link-icon flaticon-calendar"></i><span class="m-nav__link-text"> Ngày tạo : <strong>${t.created_time}</strong></span></span></li>
+            <li class="m-nav__item"><span class="m-nav__link">
+            <i class="m-nav__link-icon flaticon-calendar"></i><span class="m-nav__link-text"> Cập nhật : <strong>${t.updated_time}</strong></span></span></li>
+            <li class="m-nav__item mt-2 button_event">`;
+
+            content += `${permission_edit ? '<span class="m-badge mr-2 m-badge--success m-badge--wide btnEdit">Sửa</span>' : ''}`;
+            content += `${permission_delete ? '<span class="m-badge mr-2 m-badge--danger m-badge--wide btnDelete">Xóa</span>' : ''}`;
+
+            return content;
         }
     }];
     AJAX_DATATABLES.init();
@@ -65,6 +62,13 @@ $(function() {
         table.search($(this).val(), "group_id")
     });
 
+    $('[name="username"]').keypress(function (e) {
+        var txt = String.fromCharCode(e.which);
+        if (!txt.match(/[^&\/\\#,+()^!`$~%'":*?<>{} àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/g, '_')) {
+            return false;
+        }
+    });
+
     loadGroup('',$('[name="filter_group_id"]'));
     loadGroup();
     AJAX_CRUD_MODAL.init();
@@ -72,7 +76,6 @@ $(function() {
     $(document).on('click','.btnEdit',function () {
         let modal_form = $('#modal_form');
         let id = $(this).closest('tr').find('input[type="checkbox"]').val();
-        console.log(id);
         AJAX_CRUD_MODAL.edit(function () {
             $.ajax({
                 url : url_ajax_edit,
@@ -80,13 +83,14 @@ $(function() {
                 data: {id:id},
                 dataType: "JSON",
                 success: function(response) {
-                    console.log(response);
                     $.each(response.data, function( key, value ) {
-                        $('[name="'+key+'"]').val(value);
+                        let element = $('[name="'+key+'"]');
+                        element.val(value);
                         if(key === 'active'){
                             $('[name="active"]').bootstrapSwitch('state', (value == 1 ? true : false));
                         }
                         modal_form.find('[name="username"]').attr('readonly',true);
+                        if(key === 'avatar' && value) element.closest('.form-group').find('img').attr('src',media_url + value);
                     });
                     loadGroup(response.group);
                     modal_form.modal('show');
@@ -100,6 +104,21 @@ $(function() {
             });return false;
         });
     });
+
+    $(document).on('click','.btnSaveProfile',function () {
+        event.preventDefault();
+        $.ajax({
+            url : url_ajax_update_profile,
+            type: "POST",
+            data: $('#profile_user').serialize(),
+            dataType: "JSON",
+            success: function(response) {
+                toastr[response.type](response.message);
+                $('[name="password"]').val('');
+            }
+        });
+    });
+
 });
 
 function loadGroup(dataSelected,selector) {

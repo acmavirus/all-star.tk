@@ -48,7 +48,9 @@
 .m-portlet .m-portlet__body {
     padding: 10px;
 }
-
+.form-control-feedback{
+    color: red !important;
+}
 
 .btnUpdateField{
     cursor: pointer;
@@ -754,4 +756,13 @@ body {
 }
 .stores_{
     padding-left: 20px;
+}
+.m-portlet .m-portlet__head {
+    height: 3.1rem;
+}
+select + .select2{
+    width: 100% !important;
+}
+input + .select2{
+    width: 100% !important;
 }

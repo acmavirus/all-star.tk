@@ -32,8 +32,10 @@ define('MEDIA_NAME', "media/"); //Tên đường dẫn lưu media
 define('MEDIA_PATH', $root . DIRECTORY_SEPARATOR . MEDIA_NAME); //Đường dẫn lưu media
 define('MEDIA_URL', BASE_URL . "public/" . MEDIA_NAME); //Đường dẫn lưu media
 define('VENDOR_PATH', "theme/"); //Đường dẫn lưu theme
-define('TEMPLATE_ASSET', "/assets/admin/"); //Đường dẫn lưu theme admin
 define('TEMPLATE_DEFAULT', "/assets/default/"); //Đường dẫn lưu theme default
+define("TEMPLATE_PATH","public/default/");
+define("TEMPLATE_MAIN",TEMPLATE_PATH . '_layout');
+define("TEMPLATE_ASSET",BASE_URL . "public/");
 /*---------------------------------------------------------------
  *                    SETUP PATH
  * public/PATH
@@ -59,23 +61,3 @@ define('DEBUG_MODE', false);
 define('CACHE_MODE', TRUE);
 define('CACHE_ADAPTER', 'file');
 define('CACHE_PREFIX_NAME', 'MY_');
-
-define('CACHE_TIMEOUT_LOGIN', 60);
-
-//Config zalo
-define('ZALO_APP_ID_CFG', '1250780810165803242');
-define('ZALO_APP_SECRET_KEY_CFG', 'Ui7fBnBF3r45Y3N1Igk9');
-define('ZALO_CAL_BACK', BASE_URL . 'auth/loginzalo');
-//define('ZALO_OA_SECRET_KEY_CFG','APS_');
-//Config zalo
-
-define('FB_API', '2618030124890231');
-define('FB_SECRET', '6257cf7cd74343b5527dd43efba55880');
-define('FB_VER', 'v2.9');
-
-define('GG_API', '689686302228-ba71dd4fnncfddsf6o30gcbeidb5jngg.apps.googleusercontent.com');
-define('GG_SECRET', 'P5BJVSsjeDkyvqm-mvZ-z-Mh');
-define('GG_KEY', 'AIzaSyCOBA11YRsaiqqftlxbwZG_4FZbhmO9Mes'); //AIzaSyAhR8OG9cUL1jDfAAc6i35nt5Ki1ZJnykA
-define('GG_CAPTCHA_MODE', FALSE);
-define('GG_CAPTCHA_SITE_KEY', '6LevJWcUAAAAAMi7qfknK1bnVNd8sjQPcrShoZjC');
-define('GG_CAPTCHA_SECRET_KEY', '6LevJWcUAAAAAHE2cjYE-Kfy5LiHEnSl7bpj_Ssq');

@@ -1,143 +1,123 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
+
+require 'vendor/autoload.php';
+use Intervention\Image\ImageManagerStatic as Image;
+
 if (!function_exists('getImageThumb')) {
-    function getImageThumb($image = '',$width = '',$height= '', $crop = false, $watermark = false){
-        if(preg_match("/http/i",$image)) return $image;
+    function getImageThumb($image = '',$width = '',$height= '',$crop = true){
         if(empty($image)) {
-            $width = !empty($width)?$width:200;
-            $height = !empty($height)?$height:200;
-            $image =  "no_image.jpg";
-            //return "https://via.placeholder.com/{$width}x{$height}.png?text=Thumbnail+{$width}x{$height}";
+            return base_url()."public/default-thumbnail.png";
         }
-        $image = str_replace(MEDIA_NAME,'',$image);
-        $image = ltrim($image,'/');
-        $sourceImage = MEDIA_PATH . $image;
-
-        if(!file_exists($sourceImage) || empty(getimagesize($sourceImage))){
-            $width = !empty($width)?$width:200;
-            $height = !empty($height)?$height:200;
-            return "https://via.placeholder.com/{$width}x{$height}.png?text=Thumbnail+{$width}x{$height}";
-            //$sourceImage = dirname(MEDIA_PATH) . DIRECTORY_SEPARATOR . "no_image.png";
+        if(preg_match('/http/i', $image)) return $image;
+        if($crop == false) {
+            $pathThumb = ltrim($image, '/');
+            return MEDIA_URL.$pathThumb;
         }
-        $CI =& get_instance();
-        if($width != 0 && $height != 0){
-            $size = sprintf('-%dx%d', $width, $height);
-            $part = explode('.', $image);
-            $ext = '.'.end($part);
-            $newImage = str_replace($ext,$size.$ext, $image);
-            $newPathImage = MEDIA_PATH . 'thumb/' .$newImage;
-            if ( !file_exists( $newPathImage ) ) {
-                if(!is_dir(dirname($newPathImage))){
-                    mkdir(dirname($newPathImage), 0755, TRUE);
-                }
-
-                // CONFIGURE IMAGE LIBRARY
-                $CI->load->library('image_lib');
-                $config['image_library'] = 'gd2';
-                $config['source_image'] = $sourceImage;
-                $config['new_image'] = $newPathImage;
-                $config['maintain_ratio'] = TRUE;
-                $config['create_thumb'] = FALSE;
-                $config['quality'] = "80%";
-                $imageSize = getimagesize($sourceImage);
-                $imageWidth = intval($imageSize[0]);
-                $imageHeight = intval($imageSize[1]);
-                $dim = ($imageWidth / $imageHeight) - ($width / $height);
-                if($imageWidth > $width || $imageHeight > $height){
-                    $config['master_dim'] = ($dim > 0) ? "height" : "width";
-                    $config['height'] = $height;
-                    $config['width'] = $width;
-                }
-                $CI->image_lib->initialize($config);
-                if (!$CI->image_lib->resize()) {
-                    log_message('error',"Error resize image: $sourceImage to $newPathImage =>" . $CI->image_lib->display_errors());
-                }
-                $CI->image_lib->clear();
-                if(!empty($watermark)){
-                    $watermarkImage = getWatermark($width,$height);
-                    if(!empty($watermarkImage)){
-                        $config_watermark['image_library']       = 'gd2';
-                        $config_watermark['source_image']       = $newPathImage;
-                        $config_watermark['wm_type']       = 'overlay';
-                        $config_watermark['wm_opacity']     = 40;
-                        //$config_watermark['wm_padding']     = 30;
-                        $config_watermark['wm_vrt_alignment'] = 'middle';
-                        $config_watermark['wm_hor_alignment'] = 'center';
-                        $config_watermark['wm_overlay_path'] = getWatermark($width,$height);
-                        $CI->image_lib->initialize($config_watermark);
-                        $CI->image_lib->watermark();
-                        $CI->image_lib->clear();
+        $image = trim($image);
+        $imageOrigin = MEDIA_PATH . "/" . $image;
+        if (!empty($width) && !empty($height)) {
+            $sizeText = sprintf('-%dx%d', $width, $height);
+            $ext = pathinfo($image, PATHINFO_EXTENSION);
+            $newImage = str_replace(".$ext", "$sizeText.$ext", $image);
+            $pathThumb = MEDIA_PATH . '/thumb/' . $newImage;
+            $pathThumb = str_replace('//', '/', $pathThumb);
+            if (!file_exists($pathThumb)) {
+                try {
+                    if (!is_dir(dirname($pathThumb))) {
+                        mkdir(dirname($pathThumb), 0755, TRUE);
                     }
-                }
+                    // import the Intervention Image Manager Class
+                    // configure with favored image driver (gd by default)
+                    Image::configure(array('driver' => 'gd'));
 
-                if($crop == true){
-                    $image_config['image_library'] = 'gd2';
-                    $image_config['source_image'] = $newPathImage;
-                    $image_config['new_image'] = $newPathImage;
-                    $image_config['quality'] = "80%";
-                    $image_config['maintain_ratio'] = FALSE;
-                    $image_config['width'] = $width;
-                    $image_config['height'] = $height;
-                    $imageSize = getimagesize($newPathImage);
-                    $imageWidth = intval($imageSize[0]);
-                    $imageHeight = intval($imageSize[1]);
-                    $cropStartX = ( $imageWidth / 2) - ( $width /2 );
-                    $cropStartY = ( $imageHeight/ 2) - ( $height/2 );
-                    $image_config['x_axis'] = $cropStartX;
-                    $image_config['y_axis'] = $cropStartY;
-                    $CI->image_lib->initialize($image_config);
-                    if (!$CI->image_lib->crop()) {
-                        log_message('error',"Error crop image: $newPathImage =>" . $CI->image_lib->display_errors());
-                    }
+                    // and you are ready to go ...
+                    $image = Image::make($imageOrigin)->fit(intval($width), intval($height));
+                    $image->save($pathThumb,60);
+                } catch (Exception $e) {
                 }
             }
-            return MEDIA_URL . 'thumb' . DIRECTORY_SEPARATOR . $newImage;
+            return MEDIA_URL . 'thumb/' . ltrim($newImage, '/').'?v='.ASSET_VERSION;
         }
-        else {
-            $newPathImage = MEDIA_PATH . 'thumb/' .$image;
-            if(!is_dir(dirname($newPathImage))){
-                mkdir(dirname($newPathImage), 0755, TRUE);
+        return MEDIA_URL . ltrim($image,'/') .'?v='.ASSET_VERSION;
+    }
+}
+
+if (!function_exists('getThumbnail')) {
+    function getThumbnail($data,$width = '',$height= '',$class='',$crop=true){
+        $data = '<img loading="lazy" class="'.$class.'"  src="'.getImageThumb($data->thumbnail,$width,$height,$crop).'"  alt="'.$data->title.'" onerror="this.src=\'https://via.placeholder.com/'.$width.'x'.$height.'/C4C4C4 \'" />' ;
+        return $data;
+    }
+}
+
+if (!function_exists('getThumbnailStatic')) {
+    function getThumbnailStatic($thumbnail,$width = '', $height = '',$alt='',$class=''){
+        $data = '<img loading="lazy" class="'.$class.'"  src="'.$thumbnail.'" width="'.$width.'" height="'.$height.'" alt="'.$alt.'"/>';
+        return $data;
+    }
+}
+
+if (!function_exists('downloadLogo')) {
+    function downloadLogo($link, $name, $folder = '')
+    {
+        $ext = pathinfo($link, PATHINFO_EXTENSION);
+        $fileName = $folder . DIRECTORY_SEPARATOR . $name . '.' . (!empty($ext) ? $ext : 'png');
+        if (file_exists(MEDIA_PATH . $fileName) == false) {
+            if (!is_dir(dirname(MEDIA_PATH . $fileName))) {
+                mkdir(dirname(MEDIA_PATH . $fileName), 0755, TRUE);
             }
-            copy($sourceImage, $newPathImage);
-            return MEDIA_URL.$image;
+            file_put_contents(MEDIA_PATH . $fileName, file_get_contents($link));
+            return $fileName;
+        } else return $fileName;
+    }
+}
+
+if (!function_exists('getLogoTournament')) {
+    function getLogoTournament($id, $alt='', $class='', $w = null, $h = null){
+        $fileName = "$id.png";
+        if (file_exists(MEDIA_PATH ."tournament/". $fileName) == false && DEBUG_MODE == FALSE) {
+            file_put_contents(MEDIA_PATH ."tournament/". $fileName, file_get_contents("https://api.sofascore.com/api/v1/unique-tournament/$id/image"));
+        }
+        $src = MEDIA_URL_CDN . "tournament/$id.png?v=".ASSET_VERSION;
+        return '<img loading="lazy" class="'.$class.'"  src="'.$src.'" width="'.($w ? $w : '25').'" height="'.($h ? $h : '25').'" alt="'.$alt.'"/>';
+    }
+}
+if (!function_exists('getLogoClub')) {
+//    function getLogoClub($id, $alt='', $class='', $w = null, $h = null){
+//        $fileName = "$id.png";
+//        if (file_exists(MEDIA_PATH ."club/". $fileName) == false && DEBUG_MODE == FALSE) {
+//            file_put_contents(MEDIA_PATH ."club/". $fileName, file_get_contents("https://ls.sportradar.com/ls/crest/big/$fileName"));
+//        }
+//        $src = MEDIA_URL_CDN . "club/$id.png?v=".ASSET_VERSION;
+//            return '<img loading="lazy" class="'.$class.'"  src="'.$src.'" width="'.($w ? $w : '40').'" height="'.($h ? $h : '40').'" alt="'.$alt.'"/>';
+//
+//    }
+    function getLogoClub($id, $alt = '', $class = '', $lazy = true)
+    {
+        $src = MEDIA_NAME . "club/$id.png";
+        if(!file_exists($src)){
+            $src = TEMPLATES_ASSETS . 'no-logo.png';
+        }
+        if ($lazy == true) {
+            return '<img class="' . $class . '" src="' . $src . '" alt="' . $alt . '"/>';
+        } else {
+            return $src;
         }
     }
 }
 
-if (!function_exists('getWatermark')) {
-    function getWatermark($width = '',$height= ''){
-        $CI =& get_instance();
-        $CI->load->model('setting_model');
-        $settings = $CI->setting_model->getAll();
-        $width = intval(250/2);
-        $height = intval(300/2);
-        $image = !empty($settings['watermark']) ? $settings['watermark'] : null;
-        $image = ltrim($image,'/');
-        if(!empty($image)){
-            $source_image = MEDIA_PATH . $image;
-            $size = sprintf('-%dx%d', $width, $height);
-            $part = explode('.', $image);
-            $ext = '.'.end($part);
-            $newImage = str_replace($ext,$size.$ext, $image);
-            $newPathImage = MEDIA_PATH . $newImage;
 
-            if(!file_exists($newPathImage)) {
-                $CI->load->library('image_lib');
-                $config_watermark['image_library'] = 'gd2';
-                $config_watermark['source_image'] = $source_image;
-                $config_watermark['new_image'] = $newPathImage;
-                $config_watermark['maintain_ratio'] = TRUE;
-                $config_watermark['create_thumb'] = FALSE;
-                $config_watermark['height'] = $height;
-                $config_watermark['width'] = $width;
-                $CI->image_lib->initialize($config_watermark);
-                if (!$CI->image_lib->resize()) {
-                    log_message('error',"Error watermark image: $newPathImage =>" . $CI->image_lib->display_errors());
-                }
-                $CI->image_lib->clear();
-            }
-            return $newPathImage;
-        }else{
-            return false;
-        }
+if (!function_exists('getLogoTournamentBE')) {
+    function getLogoTournamentBE($id){
+        $src = MEDIA_URL_CDN . "tournament/$id.png";
+        return '<img src="'.$src.'" alt="Logo"/>';
+    }
+}
+
+
+if (!function_exists('getImageSwiperLazy')) {
+    function getImageSwiperLazy($data,$width = '',$height= '',$class='',$crop = true) {
+        $data = '<img class="swiper-lazy '.$class.'"  src="'.getImageThumb($data->thumbnail,$width,$height,$crop).'" alt="'.$data->title.'"/>
+        <div class="swiper-lazy-preloader"></div>' ;
+        return $data;
     }
 }

@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 /*
 | -------------------------------------------------------------------------
@@ -49,7 +49,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | Examples:	my-controller/index	-> my_controller/index
 |		my-controller/my-method	-> my_controller/my_method
 */
+//remove trailing slash from uri
+/*if (isset($_SERVER['REQUEST_URI'])){
+    $uri = $_SERVER['REQUEST_URI'];
+    if(($uri != "/") and preg_match('{/$}',$uri) ) {
+        header( "HTTP/1.1 301 Moved Permanently" );
+        header ('Location: '.preg_replace('{/$}', '', $uri));
+        exit();
+    }
+
+    if(preg_match('~[A-Z]~', $uri)) {
+        header( "HTTP/1.1 301 Moved Permanently" );
+        header ('Location: ' . strtolower ( $uri ));
+        exit();
+    }
+    if(substr($uri, -1) !== "/" && preg_match("/admin/i", $uri) != true){
+        header( "HTTP/1.1 301 Moved Permanently" );
+        header('Location: ' . strtolower ( $uri ) . "/");
+    }
+}*/
 $route['default_controller'] = 'home';
-$route['404_override'] = '';
+$route['default'] = 'home';
 $route['translate_uri_dashes'] = FALSE;
+$route['404.html'] = 'home/notfound';
 $route['admin'] = 'admin/dashboard';

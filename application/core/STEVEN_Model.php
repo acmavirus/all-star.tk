@@ -1,15 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ducto
- * Date: 05/12/2017
- * Time: 4:24 CH
- */
 defined('BASEPATH') or exit('No direct script access allowed');
 
-/**
- * Smart model.
- */
 class STEVEN_Model extends CI_Model
 {
     public $table;
@@ -18,6 +9,8 @@ class STEVEN_Model extends CI_Model
     public $column_search;
     public $order_default;
 
+    public $_controller;
+    public $_method;
     public $_dbprefix;
 
     public $_args = array();
@@ -27,6 +20,8 @@ class STEVEN_Model extends CI_Model
     {
         parent::__construct();
         $this->_dbprefix = $this->db->dbprefix;
+        $this->_controller = $this->router->fetch_class();
+        $this->_method = $this->router->fetch_method();
 
         $this->table = strtolower(str_replace('_model', '', get_Class($this)));
         $this->primary_key = "$this->table.id";
@@ -34,15 +29,20 @@ class STEVEN_Model extends CI_Model
         $this->column_search = array("title");
         $this->order_default = array("$this->table.created_time" => "DESC");
 
+        $this->_controller = $this->router->fetch_class();
+        $this->_method = $this->router->fetch_method();
+
+        $this->load->library('console');
 
         //load cache driver
         if (CACHE_MODE == TRUE) $this->load->driver('cache', array('adapter' => CACHE_ADAPTER, 'backup' => 'file', 'key_prefix' => CACHE_PREFIX_NAME));
 
     }
 
-    public function setCache($key, $data, $timeOut = 60)
+    public function setCache($key, $data, $timeOut = 3600)
     {
         if (CACHE_MODE == TRUE) {
+            if($data === null) $timeOut = 60*1;
             $this->cache->save($key, $data, $timeOut);
         }
     }
@@ -60,6 +60,45 @@ class STEVEN_Model extends CI_Model
             if (!empty($key)) return $this->cache->delete($key);
             else return $this->cache->clean();
         } else return false;
+    }
+
+    public function getDataAPIXoso($urlAPI, $data = [], $method = 'GET')
+    {
+        $urlAPI = API_DATACENTER.$urlAPI;
+        if (strtolower($method) == 'get'){
+            $urlAPI .= "?".http_build_query($data);
+        }
+
+        $optionCurl = [
+            CURLOPT_URL => $urlAPI,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json',
+            )
+        ];
+        if (strtolower($method) == 'post'){
+            $optionCurl[CURLOPT_CUSTOMREQUEST] = "POST";
+            $optionCurl[CURLOPT_POSTFIELDS] = $data;
+        }
+
+        $curl = curl_init();
+        curl_setopt_array($curl, $optionCurl);
+
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+
+        curl_close($curl);
+
+        if ($err) {
+            log_message('error', "cURL Error #:" . $err);
+            return false;
+        } else {
+            return json_decode($response);
+        }
     }
 
     /*Hàm xử lý các tham số truyền từ Datatables Jquery*/
@@ -80,13 +119,8 @@ class STEVEN_Model extends CI_Model
 
                 if (count($this->column_search) - 1 == $i)
                     $this->db->group_end();
-
-                /*if($i != 0) $fieldSearch .= ',';
-                $fieldSearch .= $this->_dbprefix.$item;*/
             }
-            //$this->db->select('MATCH ('.$fieldSearch.') AGAINST ('.$this->db->escape($keyword).' IN BOOLEAN MODE) AS score_search');
-            //$this->db->or_where('MATCH ('.$fieldSearch.') AGAINST ('.$this->db->escape($keyword).' IN BOOLEAN MODE)', NULL, FALSE);
-            //$this->db->order_by('score_search','DESC');
+            
         }
 
         if ($this->input->post('sort')) {
@@ -100,9 +134,9 @@ class STEVEN_Model extends CI_Model
         $page = 1;
         $limit = 10;
         extract($args);
-        //$this->db->distinct();
         if ($typeQuery === 'count' && empty($search)) $this->db->select('1');
         $this->db->from($this->table);
+
 
         if (isset($is_featured))
             $this->db->where("$this->table.is_featured", $is_featured);
@@ -110,8 +144,33 @@ class STEVEN_Model extends CI_Model
         if (isset($is_status))
             $this->db->where("$this->table.is_status", $is_status);
 
+        if (!empty($keyword))
+            $this->db->like("$this->table.title", $keyword);
+
+        if (!empty($search)){
+            foreach ($this->column_search as $i => $item) {
+                if ($i == 0) {
+                    $this->db->group_start();
+                    $this->db->like($item, $search, 'both', false);
+                    $this->db->or_like($item, $search, 'both', false);
+                } else {
+                    $this->db->or_like($item, $search, 'both', false);
+                }
+
+                if (count($this->column_search) - 1 == $i)
+                    $this->db->group_end();
+            }
+        }
+
         if (!empty($id))
             $this->db->where("$this->table.id", $id);
+
+        if (!empty($post_id))
+            $this->db->where("$this->table.post_id", $post_id);
+
+        if (!empty($slug)){
+            $this->db->where('slug',$slug);
+        }
 
         if (!empty($in))
             $this->db->where_in("$this->table.id", $in);
@@ -125,37 +184,29 @@ class STEVEN_Model extends CI_Model
         if (!empty($or_not_in))
             $this->db->or_where_not_in("$this->table.id", $or_not_in);
 
+        if (!empty($created_time))
+            $this->db->like("$this->table.created_time", $created_time);
+
+        if (!empty($author))
+            $this->db->where("$this->table.author", $author);
+
+        if (!empty($offset))
+            $this->db->offset($offset);
+
 
         $this->_get_datatables_query();
-
-        if (!empty($search)) {
-            //$this->db->select('MATCH (title) AGAINST (' . $this->db->escape($search) . ' IN NATURAL LANGUAGE MODE) AS score_search');
-            $this->db->group_start();
-            if(!empty($this->column_search)) foreach ($this->column_search as $k => $field){
-                if($k == 0) $this->db->like($field, $search);
-                else $this->db->or_like($field, $search);
-            }
-            $this->db->group_end();
-            //$this->db->or_like("title", $search);
-            //$this->db->where('MATCH (title) AGAINST (' . $this->db->escape($search) . ' IN NATURAL LANGUAGE MODE)', NULL, FALSE);
-            //$this->db->group_end();
-            //$this->db->order_by('score_search', 'DESC');
-        }
 
         if ($typeQuery == false) {
             if (!empty($order) && is_array($order)) {
                 foreach ($order as $k => $v)
                     $this->db->order_by($k, $v);
             }
-            if($limit !== false){
-                $offset = ($page - 1) * $limit;
-                $this->db->limit($limit, $offset);
-            }
+            $offset = ($page - 1) * $limit;
+            $this->db->limit($limit, $offset);
         }
     }
 
-    public function _where_custom($args = array())
-    {
+    public function _where_custom($args = array()) {
     }
 
     private function _where($args = array(), $typeQuery = null)
@@ -202,28 +253,62 @@ class STEVEN_Model extends CI_Model
         $query = $this->db->get();
         if ($returnType !== "object") return $query->result_array(); //Check kiểu data trả về
         else return $query->result();
+
     }
 
     /*
      * Lấy dữ liệu một hàng ra
      * Truyền vào id
      * */
+
+    public function getDataByField($field, $value, $select = '*')
+    {
+        $key = 'getDataByField_'.$field.$value.$this->table;
+        $data = $this->getCache($key);
+        if(empty($data)){
+            $this->db->select($select);
+            $this->db->from($this->table);
+            $this->db->where("$this->table.$field", $value);
+            $data = $this->db->get()->row();
+            $this->setCache($key,$data,60*60);
+        }
+        return $data;
+    }
+
     public function getByField($field, $value, $select = '*')
     {
         $this->db->select($select);
         $this->db->from($this->table);
         $this->db->where("$this->table.$field", $value);
-        $query = $this->db->get();
-        return $query->row();
+        $query = $this->db->get()->row();
+        return $query;
     }
 
-    public function getById($id, $select = '*', $lang_code = null)
-    {
-
+    public function getById($id, $select = '*') {
         $this->db->select($select);
         $this->db->from($this->table);
         $this->db->where("$this->table.id", $id);
+        $query = $this->db->get()->row();
+        return $query;
+    }
 
+
+
+    public function getDataBySlug($slug, $select = '*') {
+
+        $this->db->select($select);
+        $this->db->from($this->table);
+        $this->db->where("$this->table.slug", $slug);
+        $this->db->where("$this->table.is_status", 1);
+        $query = $this->db->get()->row();
+        return $query;
+    }
+
+
+    public function getDataPreview ($id) {
+        $this->db->select('*');
+        $this->db->from($this->table);
+        $this->db->where("$this->table.id", $id);
         $query = $this->db->get();
         return $query->row();
     }
@@ -272,11 +357,9 @@ class STEVEN_Model extends CI_Model
     {
         $this->db->select("$this->table.id, title AS text");
         $this->db->from($this->table);
-        if (is_array($ids)) {
-            $this->db->where_in("$this->table.id", $ids);
-            $this->db->order_by("FIELD(id,".join(',',$ids).")");
-        }
+        if (is_array($ids)) $this->db->where_in("$this->table.id", $ids);
         else $this->db->where("$this->table.id", $ids);
+
         $query = $this->db->get();
         return $query->result();
     }
@@ -287,6 +370,8 @@ class STEVEN_Model extends CI_Model
         if ($tablename == '') {
             $tablename = $this->table;
         }
+
+
 
         if (!$this->db->insert($tablename, $data)) {
             log_message('info', json_encode($data));
@@ -329,6 +414,7 @@ class STEVEN_Model extends CI_Model
             $tablename = $this->table;
         }
         if (!empty($conditions)) $this->db->where($conditions);
+        $this->db->order_by('id','desc');
 
         return $this->db->get($tablename)->result();
     }
@@ -340,7 +426,7 @@ class STEVEN_Model extends CI_Model
         }
         $this->db->insert($tablename, $data);
 
-        return $this->db->affected_rows();
+        return $this->db->insert_id();
     }
 
 
@@ -351,7 +437,7 @@ class STEVEN_Model extends CI_Model
         }
         $this->db->insert_batch($tablename, $data);
 
-        return $this->db->affected_rows();
+        return $this->db->insert_id();
     }
 
     public function insertOnUpdate($data, $tablename = '')
@@ -389,7 +475,6 @@ class STEVEN_Model extends CI_Model
 
         return true;
     }
-
 
     public function delete($conditions, $tablename = '')
     {
@@ -434,41 +519,4 @@ class STEVEN_Model extends CI_Model
         return $this->db->get($tablename)->num_rows();
     }
 
-    function array_group_by(array $data, $key) : array
-    {
-        if (!is_string($key) && !is_int($key) && !is_float($key) && !is_callable($key)) {
-            trigger_error('array_group_by(): The key should be a string, an integer, a float, or a function', E_USER_ERROR);
-        }
-
-        $isFunction = !is_string($key) && is_callable($key);
-
-        // Load the new array, splitting by the target key
-        $grouped = [];
-        foreach ($data as $value) {
-            $groupKey = null;
-
-            if ($isFunction) {
-                $groupKey = $key($value);
-            } else if (is_object($value)) {
-                $groupKey = $value->{$key};
-            } else {
-                $groupKey = $value[$key];
-            }
-
-            $grouped[$groupKey][] = $value;
-        }
-
-        // Recursively build a nested grouping if more parameters are supplied
-        // Each grouped array value is grouped according to the next sequential key
-        if (func_num_args() > 2) {
-            $args = func_get_args();
-
-            foreach ($grouped as $groupKey => $value) {
-                $params = array_merge([$value], array_slice($args, 2, func_num_args()));
-                $grouped[$groupKey] = call_user_func_array(array($this, "array_group_by"), $params);
-            }
-        }
-
-        return $grouped;
-    }
 }

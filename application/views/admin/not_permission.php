@@ -1,14 +1,10 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ducto
- * Date: 14/12/2017
- * Time: 12:06 CH
- */
 defined('BASEPATH') OR exit('No direct script access allowed');
 ?>
 <section class="content">
     <div class="error-page">
+        <?php $request_ajax = $this->input->server(array('REQUEST_URI')); ?>
+        <?php echo $request_ajax['REQUEST_URI']; ?>
         <h2 class="headline text-yellow"> Bạn không có quyền truy cập chức năng này !</h2>
 
         <div class="error-content">

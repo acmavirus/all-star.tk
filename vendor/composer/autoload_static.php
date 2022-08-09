@@ -36,6 +36,7 @@ class ComposerStaticInit64d368b46ec78f7cf1dae420b415c8e2
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
         'b6b991a57620e2fb6b2f66f03fe9ddc2' => __DIR__ . '/..' . '/symfony/string/Resources/functions.php',
         'ed962a97bd972bc82007176b647d4e36' => __DIR__ . '/..' . '/facade/ignition/src/helpers.php',
+        '2b617d5c33974e4b0e1133bf47195647' => __DIR__ . '/../..' . '/App/Helpers/data_helper.php',
     );
 
     public static $prefixLengthsPsr4 = array (

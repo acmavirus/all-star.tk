@@ -52,3 +52,5 @@ function toNormal($str)
         return $str;
     }
 }
+
+?>

@@ -13,5 +13,6 @@ class Home extends STEVEN_Controller
 {
 	public function index()
 	{
+		$this->load->view('default/layout', []);
 	}
 }

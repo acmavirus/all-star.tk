@@ -28,13 +28,7 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        },
-        "files": [
-            "App/Helpers/link_helper.php",
-            "App/Helpers/button_helper.php",
-            "App/Helpers/image_helper.php",
-            "App/Helpers/data_helper.php"
-        ]
+        }
     },
     "autoload-dev": {
         "psr-4": {

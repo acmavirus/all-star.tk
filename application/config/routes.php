@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 /*
 | -------------------------------------------------------------------------
@@ -19,7 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 | Please see the user guide for complete details:
 |
-|	https://codeigniter.com/userguide3/general/routing.html
+|	https://codeigniter.com/user_guide/general/routing.html
 |
 | -------------------------------------------------------------------------
 | RESERVED ROUTES
@@ -49,6 +49,40 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | Examples:	my-controller/index	-> my_controller/index
 |		my-controller/my-method	-> my_controller/my_method
 */
-$route['default_controller'] = 'welcome';
-$route['404_override'] = '';
+
+$route['default_controller'] = 'home';
+$route['default'] = 'home';
 $route['translate_uri_dashes'] = FALSE;
+$route['404.html'] = 'page/notfound';
+$route['admin'] = 'admin/dashboard';
+/*post*/
+$route['(:any)-p(:num)'] = 'post/detail/$1/$2';
+
+/*Vote*/
+$route['reviews/ajax_vote']  = 'reviews/ajax_vote';
+
+$route['tags/(:any)'] = 'category/tags/$1';
+$route['tags/(:any)/(:num)'] = 'category/tags/$1/$2';
+
+/*Search*/
+$route['tim-kiem']  = 'search/index';
+/* SOI CAU */
+$route['soi-cau-(:any).html'] = 'Page/soicau/$1';
+/*Category*/
+$route['(:any)-xo-so-(:any).html'] = 'category/detail/$2';
+$route['([a-z]{4,5})-(\d\d-\d\d-\d\d\d\d)'] = 'category/date/$1/$2';
+$route['([a-zA-Z0-9]{5})-(\d\d-\d\d-\d\d\d\d)'] = 'category/date/$1/$2';
+/*Quay thử*/
+$route['quay-thu-(:any).html'] = 'Page/spin/$1';
+
+/*Sitemap*/
+$route['sitemap-new2022.xml']  = 'seo/index';
+$route['sitemap-news_hot2022.xml']  = 'seo/sitemap_google_news';
+$route['sitemap-category_new2022.xml'] = 'seo/sitemap_category';
+$route['sitemap-result_new2022.xml'] = 'seo/sitemap_result';
+$route['sitemap-post_new2022__(:num).xml'] = 'seo/sitemap_post/$1';
+/*Sitemap*/
+
+// all
+$route['(:any).html'] = 'category/detail/$1';
+$route['(:any).html/(:num)'] = 'category/detail/$1/$2';

@@ -1,0 +1,71 @@
+.frame-kq {
+    border: 1px solid #e8e8e8;
+}
+.back_gray {
+    border: 1px solid #e8e8e8;
+    background-color: #e8e8e8;
+}
+
+.rd > a {
+    color: #900 !important;
+    text-decoration: underline;
+}
+
+.mega_result {
+    font-size: 26px;
+}
+
+.mega_result ul,
+.mega_result ul li {
+    text-align: center;
+    list-style-type: none;
+}
+
+.mega_result ul li {
+    width: 57px;
+    height: 57px;
+    line-height: 57px;
+    font-size: 30px;
+    background: #c00;
+
+    color: #fff;
+    border: 3px solid #c00;
+    display: inline-block;
+    border-radius: 57px;
+    vertical-align: middle;
+    font-weight: 700;
+    margin-right: 20px;
+    margin-bottom: 10px;
+}
+
+.circle-num i {
+    font-style: normal;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    /* border: 2px solid #fff; */
+    border: 1px solid #c00;
+    background-color: #c00;
+    display: inline-block;
+    margin: 0 5px 0 0;
+    font-weight: normal;
+}
+.ketqua table td {
+    border: 1px #e8e8e8 solid;
+    padding: 3px;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.circle-num i {
+    font-style: normal;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    /* border: 2px solid #fff; */
+    border: 1px solid #c00;
+    background-color: #c00;
+    display: inline-block;
+    margin: 0 5px 0 0;
+    font-weight: normal;
+}

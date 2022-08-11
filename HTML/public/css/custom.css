@@ -1,0 +1,237 @@
+#ynghiaconso {
+    width: 100%;
+    margin: 10px 0 0;
+    background: #eee;
+    font-size: 12px;
+    margin-bottom: 15px;
+}
+#ynghiaconso .inner {
+    background: #fff;
+}
+#ynghiaconso .nav-tabs {
+    border-bottom: 0;
+    background: #eee;
+}
+#ynghiaconso .nav-tabs > li {
+    background: #eee;
+    margin-bottom: 0;
+    width: 93px;
+    height: 50px;
+    float: left;
+}
+#ynghiaconso .nav-tabs > li.active {
+    background: #fff;
+}
+#ynghiaconso .nav-tabs > li > a {
+    border-radius: 0;
+    border: 0;
+    padding: 15px;
+    color: #333;
+    font-size: 12px;
+    display: block;
+}
+#ynghiaconso .nav-tabs > li.active a {
+    color: #333;
+}
+#ynghiaconso .tab-content {
+    padding: 10px;
+}
+#ynghiaconso table td {
+    padding: 2px;
+    border: 1px solid #ddd;
+}
+#ynghiaconso .tab-content .tab-pane {
+    display: none;
+}
+#ynghiaconso .tab-content .tab-pane.active {
+    display: block;
+}
+span.conso100 {
+    text-indent: -99999999px;
+    height: 30px;
+    width: 40px;
+    display: inline-block;
+    border: 0;
+    vertical-align: middle;
+    position: relative;
+    text-align: center;
+    color: #000;
+}
+.conso100.conchuot {
+    background-position: 0% -21px;
+}
+.conso100.contrau {
+    background-position: -52px -21px;
+}
+.conso100.concop {
+    background-position: -102px -21px;
+}
+.conso100.conmeonha {
+    background-position: -150px -21px;
+}
+.conso100.conmeorung {
+    background-position: -202px -21px;
+}
+.conso100.conrongnam {
+    background-position: -252px -21px;
+}
+.conso100.conrongbay {
+    background-position: -302px -21px;
+}
+.conso100.conran {
+    background-position: -300px -71px;
+}
+.conso100.conngua {
+    background-position: 0% -71px;
+}
+.conso100.conde {
+    background-position: -52px -71px;
+}
+.conso100.conkhi {
+    background-position: -102px -71px;
+}
+.conso100.conga {
+    background-position: -150px -71px;
+}
+.conso100.concho {
+    background-position: -202px -71px;
+}
+.conso100.conheo {
+    background-position: -252px -71px;
+}
+.conso100.ongtao {
+    background-position: 0% -120px;
+}
+.conso100.ongto {
+    background-position: -52px -120px;
+}
+.conso100.tientai {
+    background-position: -102px -121px;
+}
+.conso100.bavai {
+    background-position: -150px -121px;
+}
+.conso100.ongtroi {
+    background-position: -200px -121px;
+}
+.conso100.ongdia {
+    background-position: -252px -119px;
+}
+.conso100.thantai {
+    background-position: -300px -121px;
+}
+.conso100.trungvit {
+    background-position: 0% -171px;
+}
+.conso100.concatrang {
+    background-position: -52px -171px;
+}
+.conso100.conoc {
+    background-position: -102px -171px;
+}
+.conso100.convit {
+    background-position: -149px -171px;
+}
+.conso100.concong {
+    background-position: -200px -171px;
+}
+.conso100.contrung {
+    background-position: -252px -171px;
+}
+.conso100.convoi {
+    background-position: -302px -171px;
+}
+.conso100.contho {
+    background-position: -52px -320px;
+}
+.conso100.conong {
+    background-position: 0% -219px;
+}
+.conso100.conhac {
+    background-position: -52px -219px;
+}
+.conso100.conbuom {
+    background-position: -102px -221px;
+}
+.conso100.conret {
+    background-position: -150px -221px;
+}
+.conso100.cogai {
+    background-position: -198px -218px;
+}
+.conso100.conbocau {
+    background-position: -250px -221px;
+}
+.conso100.conech {
+    background-position: -300px -220px;
+}
+.conso100.cono {
+    background-position: 0% -274px;
+}
+.conso100.conrua {
+    background-position: -52px -277px;
+}
+.conso100.conluon {
+    background-position: -153px -270px;
+}
+.conso100.concaden {
+    background-position: -198px -274px;
+}
+.conso100.contom {
+    background-position: -253px -274px;
+}
+.conso100.connhen {
+    background-position: -300px -270px;
+}
+.conso100.connai {
+    background-position: 2px -320px;
+}
+.banner {
+    margin: 0.5rem 0;
+    text-align: center;
+}
+
+span.conso100 {
+    background: url(../images/100conso.png) center no-repeat;
+}
+
+.header-top {
+    background: #212529 !important;
+}
+
+.header-top .nav-link {
+    color: white;
+}
+
+div.main-menu span.kq-home {
+    background: rgba(255, 255, 255, 0.288);
+    font-size: 20px;
+    
+}
+
+div.main-menu {
+    justify-content: unset;
+}
+
+
+
+ul.main-menu > li {
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    padding-left: 10px;
+} 
+
+ul.sub-menu > li {
+    padding-right: 20px;
+    padding-left: 20px;
+    line-height: 40px;
+}
+
+ul.sub-menu {
+    border-top: 4px solid white;
+}
+
+#menu {
+    margin: 0;
+}

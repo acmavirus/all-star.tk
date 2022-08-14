@@ -99,7 +99,7 @@ if (!empty($oneItem) && $this->_controller === 'post' && $this->_method === 'det
             'logo',
             Schema::init(false)
                 ->type('ImageObject')
-                ->url(getImageThumb($this->_settings->logo,160,60))
+                ->url(getImageThumb($logo,160,60))
                 ->width(160)
                 ->height(60)
                 ->render_data()

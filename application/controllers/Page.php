@@ -14,24 +14,6 @@ class Page extends Public_Controller
         $this->_category = new Category_model();
     }
 
-    public function music()
-    {
-        $data = [];
-        $params = [
-            'page' => 1,
-            'limit'=> 18
-        ];
-        $data['data'] = $this->_post->getData($params);
-
-        //add breadcrumbs
-        $this->breadcrumbs->push("Home", base_url());
-        $this->breadcrumbs->push("dsaf", base_url());
-        $data['breadcrumb'] = $this->breadcrumbs->show();
-
-        $data['main_content'] = $this->load->view(TEMPLATE_PATH . 'page/music', $data, TRUE);
-        $this->load->view(TEMPLATE_MAIN, $data);
-    }
-
     public function tool()
     {
         $data = [];
@@ -43,7 +25,7 @@ class Page extends Public_Controller
 
         //add breadcrumbs
         $this->breadcrumbs->push("Home", base_url());
-        $this->breadcrumbs->push("dsaf", base_url());
+        $this->breadcrumbs->push("Link tool", base_url('tool.html'));
         $data['breadcrumb'] = $this->breadcrumbs->show();
         
         $data['main_content'] = $this->load->view(TEMPLATE_PATH . 'page/tool', $data, TRUE);

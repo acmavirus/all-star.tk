@@ -85,8 +85,13 @@ if (!function_exists('getCategoryChild')) {
         $_this = &get_instance();
         $_this->load->model('category_model');
         $model = new Category_model();
-        $model->_recursive_child($model->_all_category(), $parent_id);
-        return $model->_list_category_child;
+        $all = $model->_all_category();
+        if (!empty($all)) foreach ($all as $key => $item) {
+            if ($item->parent_id == $parent_id) {
+                $list_category_child[] = $item;
+            }
+        }
+        return $list_category_child;
     }
 }
 

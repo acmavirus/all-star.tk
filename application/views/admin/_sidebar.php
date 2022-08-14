@@ -105,7 +105,7 @@
                 <a href="javascript:;" class="m-menu__link m-menu__toggle">
                     <i class="m-menu__link-icon fa fa-newspaper-o"></i>
                     <span class="m-menu__link-text">
-                        Quản lý Xổ số
+                        Quản lý Danh mục
                     </span>
                     <i class="m-menu__ver-arrow la la-angle-right"></i>
                 </a>
@@ -115,40 +115,20 @@
                         <li class="m-menu__item  m-menu__item--parent" aria-haspopup="true">
                             <span class="m-menu__link">
                                 <span class="m-menu__link-text">
-                                    Quản lý Xổ số
+                                    Quản lý Danh mục
                                 </span>
                             </span>
                         </li>
 		                    <li class="m-menu__item " aria-haspopup="true">
-			                    <a href="<?php echo site_admin_url('category/vietlot') ?>" class="m-menu__link">
+			                    <a href="<?php echo site_admin_url('category/origami') ?>" class="m-menu__link">
 				                    <i class="m-menu__link-bullet m-menu__link-bullet--dot">
 					                    <span></span>
 				                    </i>
 				                    <span class="m-menu__link-text">
-                                Danh mục xổ số vietlot
+                                Danh mục Origami
                             </span>
 			                    </a>
 		                    </li>
-                        <li class="m-menu__item " aria-haspopup="true">
-                            <a href="<?php echo site_admin_url('category/lottery') ?>" class="m-menu__link">
-                                <i class="m-menu__link-bullet m-menu__link-bullet--dot">
-                                    <span></span>
-                                </i>
-                                <span class="m-menu__link-text">
-                                    Danh mục Miền & Tỉnh
-                                </span>
-                            </a>
-                        </li>
-                        <li class="m-menu__item " aria-haspopup="true">
-                            <a href="<?php echo site_admin_url('category/weekday') ?>" class="m-menu__link">
-                                <i class="m-menu__link-bullet m-menu__link-bullet--dot">
-                                    <span></span>
-                                </i>
-                                <span class="m-menu__link-text">
-                                    Danh mục Thứ
-                                </span>
-                            </a>
-                        </li>
                     </ul>
                 </div>
             </li>
@@ -208,39 +188,7 @@
                 </div>
             </li>
             <!--Quản lý bài viết-->
-
-            <li class="m-menu__item  m-menu__item--submenu" aria-haspopup="true" m-menu-submenu-toggle="hover">
-                <a href="javascript:;" class="m-menu__link m-menu__toggle">
-                    <i class="m-menu__link-icon fa fa-newspaper-o"></i>
-                    <span class="m-menu__link-text">
-                        Quản lý banner
-                    </span>
-                    <i class="m-menu__ver-arrow la la-angle-right"></i>
-                </a>
-                <div class="m-menu__submenu ">
-                    <span class="m-menu__arrow"></span>
-                    <ul class="m-menu__subnav">
-                        <li class="m-menu__item  m-menu__item--parent" aria-haspopup="true">
-                            <span class="m-menu__link">
-                                <span class="m-menu__link-text">
-                                    Quản lý banner
-                                </span>
-                            </span>
-                        </li>
-                        <li class="m-menu__item " aria-haspopup="true">
-                            <a href="<?php echo site_admin_url('banner') ?>" class="m-menu__link ">
-                                <i class="m-menu__link-bullet m-menu__link-bullet--dot">
-                                    <span></span>
-                                </i>
-                                <span class="m-menu__link-text">
-                                    Danh sách banner
-                                </span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-
+            
             <!--Quản lý Page-->
             <li class="m-menu__item  m-menu__item--submenu seo" aria-haspopup="true" m-menu-submenu-toggle="hover">
                 <a href="javascript:;" class="m-menu__link m-menu__toggle">

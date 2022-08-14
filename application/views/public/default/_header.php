@@ -17,6 +17,7 @@
 		<h3 class="noscreen">Navigation</h3>
 		<ul class="box">
 			<li><a href="/" data-href="home/index" title="Home">Home</a></li>
+			<li><a href="/origami.html" data-href="page/origami" title="Home">Origami</a></li>
 			<li><a href="/tool.html" data-href="page/tool" title="Link Tool">Link Tool</a></li>
 		</ul>
 		<hr class="noscreen" />

@@ -14,7 +14,6 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-        </div>
+        <div class="col-md-3 p-0 m-0"><?php $this->load->view(TEMPLATE_PATH. "block/right_bar"); ?></div>
     </div>
 </main>

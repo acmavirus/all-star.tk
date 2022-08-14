@@ -45,8 +45,7 @@ class Post extends Admin_Controller
         $limit = !empty($pagination['perpage']) && $pagination['perpage'] > 0 ? $pagination['perpage'] : 1;
 
         $queryFilter = $this->input->post('query');
-        // $referrer = $this->agent->referrer();
-        // $type = str_replace(site_admin_url('post/'), '', $referrer);
+
         $params = [
             'category_id'   => !empty($queryFilter['category_id']) ? $queryFilter['category_id'] : '',
             'page'          => $page,
@@ -91,8 +90,6 @@ class Post extends Admin_Controller
             ],
             "data" =>  $data
         ];
-
-
         $this->returnJson($output);
     }
 

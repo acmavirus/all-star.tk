@@ -51,7 +51,7 @@ if (!function_exists('getThumbnail')) {
 
 if (!function_exists('getThumbnailStatic')) {
     function getThumbnailStatic($thumbnail,$width = '', $height = '',$alt='',$class=''){
-        $data = '<img loading="lazy" class="'.$class.'"  src="'.$thumbnail.'" width="'.$width.'" height="'.$height.'" alt="'.$alt.'"/>';
+        $data = '<img class="'.$class.'"  src="'.$thumbnail.'" width="'.$width.'" height="'.$height.'" alt="'.$alt.'"/>';
         return $data;
     }
 }

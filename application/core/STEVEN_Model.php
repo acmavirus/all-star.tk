@@ -470,7 +470,7 @@ class STEVEN_Model extends CI_Model
         }
         $this->db->insert($tablename, $data);
 
-        return $this->db->affected_rows();
+        return $this->db->insert_id();
     }
 
 

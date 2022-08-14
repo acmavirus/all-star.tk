@@ -16,7 +16,6 @@ define('MEDIA_NAME', "picture/"); //Tên đường dẫn lưu media
 define('MEDIA_PATH', str_replace('\\', '/', $root . DIRECTORY_SEPARATOR . MEDIA_NAME)); //Đường dẫn lưu media
 define('MEDIA_HIDE_FOLDER', 'mcith|thumb');
 define('MEDIA_URL', $protocol . $domain_name . DIRECTORY_SEPARATOR . MEDIA_NAME);
-define('MEDIA_URL_CDN', $protocol . $domain_name . DIRECTORY_SEPARATOR . "picture/");
 define('API_DATACENTER', "https://dataxoso.webest.asia/");
 define('TEMPLATES_ASSETS', BASE_URL . 'public/');
 

@@ -56,5 +56,6 @@ $route['translate_uri_dashes'] = FALSE;
 $route['404.html'] = 'page/notfound';
 $route['admin'] = 'admin/dashboard';
 
+$route['(:any)-page.html'] = 'page/detail/$1';
 $route['(:any)-post.html'] = 'post/detail/$1';
 $route['(:any).html'] = 'page/$1';

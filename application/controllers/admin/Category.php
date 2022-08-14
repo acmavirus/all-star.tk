@@ -70,23 +70,11 @@ class Category extends Admin_Controller
     }
 
 
-    public function lottery(){
-        $data['heading_title'] = "Quản lý miền & tỉnh";
-        $data['heading_description'] = "Danh mục miền & tỉnh";
+    public function origami(){
+        $data['heading_title'] = "Quản lý origami";
+        $data['heading_description'] = "Danh mục origami";
         $this->get_list($data);
     }
-    public function vietlot(){
-        $data['heading_title'] = "Quản lý danh mục vietlot";
-        $data['heading_description'] = "Danh mục xổ số vietlot";
-        $this->get_list($data);
-    }
-
-    public function weekday(){
-        $data['heading_title'] = "Quản lý thứ";
-        $data['heading_description'] = "Danh mục thứ";
-        $this->get_list($data);
-    }
-
 
     public function ajax_list()
     {

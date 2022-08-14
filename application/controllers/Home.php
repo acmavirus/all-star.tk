@@ -19,7 +19,10 @@ class Home extends Public_Controller
         $data = [];
         $params = [
             'page' => 1,
-            'limit'=> 18
+            'limit'=> 18,
+            'order'=> [
+                'id' => 'RANDOM'
+            ]
         ];
         $data['data'] = $this->_post->getData($params);
         $data['breadcrumb'] = $this->breadcrumbs->show();

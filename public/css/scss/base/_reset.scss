@@ -1,0 +1,326 @@
+* {
+    min-height: 1px;
+}
+
+body {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    background: #fff1f3 url("../design/bg.gif") 0 0 repeat-x;
+    font: 70%/160% "verdana", sans-serif;
+    color: #7f000b;
+    _text-align: center;
+}
+
+a {
+    color: #7f000b;
+    border: 0;
+    margin: 0;
+    padding: 0;
+
+    &:hover {
+        color: #ff2740;
+    }
+}
+
+p {
+    border: 0;
+    margin: 15px 0;
+    padding: 0;
+}
+
+div {
+    display: block;
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    border: 0;
+    margin: 15px 0 10px 0;
+    padding: 0;
+    font-weight: bold;
+    font-size: 260%;
+    line-height: 100%;
+    font-family: "georgia", serif;
+    font-weight: normal;
+}
+
+h2 {
+    border: 0;
+    margin: 15px 0 10px 0;
+    padding: 0;
+    font-weight: bold;
+    font-size: 180%;
+    line-height: 100%;
+    font-family: "georgia", serif;
+    font-weight: normal;
+}
+
+h3 {
+    border: 0;
+    margin: 15px 0 10px 0;
+    padding: 0;
+    font-weight: bold;
+    font-size: 120%;
+    line-height: 100%;
+    font-weight: bold;
+}
+
+h4 {
+    border: 0;
+    margin: 15px 0 10px 0;
+    padding: 0;
+    font-weight: bold;
+    font-size: 120%;
+}
+
+h5 {
+    border: 0;
+    margin: 15px 0 10px 0;
+    padding: 0;
+    font-weight: bold;
+    font-size: 100%;
+}
+
+table {
+    display: table;
+    border-collapse: collapse;
+    margin: 15px 0;
+    padding: 0;
+    border: 1px solid #ffaec0;
+    font-size: 100%;
+}
+
+tr {
+    display: table-row;
+}
+
+th {
+    display: table-cell;
+    border: 1px solid #ffaec0;
+    margin: 0;
+    padding: 5px;
+    vertical-align: top;
+    text-align: left;
+    background: #ffe5e9;
+    text-align: center;
+    color: #7f000b;
+    font-weight: bold;
+}
+
+td {
+    display: table-cell;
+    border: 1px solid #ffaec0;
+    margin: 0;
+    padding: 5px;
+    vertical-align: top;
+    text-align: left;
+}
+
+ul {
+    display: block;
+    border: 0;
+    margin: 15px 0 15px 40px;
+    padding: 0;
+
+    ul {
+        margin: 0 0 0 20px;
+    }
+
+    ol {
+        margin: 0 0 0 20px;
+    }
+}
+
+ol {
+    display: block;
+    border: 0;
+    margin: 15px 0 15px 40px;
+    padding: 0;
+    list-style-type: decimal;
+
+    ol {
+        margin: 0 0 0 20px;
+    }
+
+    ul {
+        margin: 0 0 0 20px;
+    }
+}
+
+li {
+    display: list-item;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    _height: 1px;
+}
+
+dl {
+    border: 0;
+    margin: 15px 0;
+    padding: 0;
+}
+
+dt {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    font-weight: bold;
+}
+
+dd {
+    border: 0;
+    margin: 0 0 0 30px;
+    padding: 0;
+}
+
+form {
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+fieldset {
+    border: 1px solid #ccc;
+    margin: 15px 0;
+    padding: 10px;
+}
+
+legend {
+    margin-left: 10px;
+    font-size: 100%;
+    font-weight: bold;
+    color: #008;
+}
+
+hr {
+    display: block;
+    height: 1px;
+    margin: 10px 0;
+    padding: 0;
+    background: #CCC;
+    border: 0 solid #CCC;
+    color: #CCC;
+}
+
+img {
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+span {
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+abbr {
+    border-bottom: 1px dotted #CCC;
+    cursor: help;
+}
+
+acronym {
+    border-bottom: 1px dotted #CCC;
+    cursor: help;
+}
+
+del {
+    text-decoration: line-through;
+}
+
+.through {
+    text-decoration: line-through;
+}
+
+strong {
+    font-weight: bold;
+}
+
+.strong {
+    font-weight: bold;
+}
+
+cite {
+    font-style: italic;
+}
+
+em {
+    font-style: italic;
+}
+
+q {
+    font-style: italic;
+}
+
+var {
+    font-style: italic;
+}
+
+code {
+    font-family: monospace;
+    font-size: 110%;
+}
+
+kbd {
+    font-family: monospace;
+    font-size: 110%;
+}
+
+samp {
+    font-family: monospace;
+    font-size: 110%;
+}
+
+.f-left {
+    float: left;
+}
+
+.f-right {
+    float: right;
+}
+
+.t-left {
+    text-align: left;
+}
+
+.t-center {
+    text-align: center;
+}
+
+.t-right {
+    text-align: right;
+}
+
+.va-middle {
+    vertical-align: middle;
+}
+
+.clear {
+    clear: both;
+}
+
+.box {
+    min-height: 1px;
+    _height: 1px;
+
+    &:after {
+        content: ".";
+        display: block;
+        line-height: 0px;
+        font-size: 0px;
+        visibility: hidden;
+        clear: both;
+    }
+}
+
+.nom {
+    margin: 0;
+}
+
+.noscreen {
+    display: none;
+}

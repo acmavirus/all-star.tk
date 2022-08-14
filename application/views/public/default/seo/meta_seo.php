@@ -1,6 +1,6 @@
 <?php
-$logo = $this->_settings->logo;
-$email = $this->_settings->email;
+$logo = (!empty($this->_settings->logo)) ? $this->_settings->logo : '';
+$email = (!empty($this->_settings->email)) ? $this->_settings->email : '';
 $phone = $this->_settings->phone;
 $title = $this->_settings->title;
 $facebook = $this->_settings_social->facebook;

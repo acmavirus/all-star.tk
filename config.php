@@ -28,10 +28,11 @@ define('CACHE_FILE_MODE', FALSE);
 define('CACHE_ADAPTER', 'file');
 define('CACHE_PREFIX_NAME', 'XSTVT_');
 
-define('DB_DEFAULT_HOST', '154.94.8.75');
-define('DB_DEFAULT_USER', 'xosovtvcom4ab3');
-define('DB_DEFAULT_PASSWORD', '443a4f07c6cb7818');
-define('DB_DEFAULT_NAME', 'xosovtv_com_4ab3');
+define('DB_DEFAULT_HOST', '95.111.202.146'); //DB HOST
+define('DB_DEFAULT_USER', 'thuc_db'); //DB USER
+define('DB_DEFAULT_PASSWORD', 'thuc_db123'); //DB PASSWORD
+define('DB_DEFAULT_NAME', 'thuc_db'); //DB NAME
+
 define('CACHE_TIMEOUT_LOGIN', 1800);
 
 //Config zalo

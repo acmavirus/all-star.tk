@@ -6,10 +6,9 @@
                         <hr class="noscreen" />
                         <p id="breadcrumbs">You are here: <a href="#">Home</a> &gt; <a href="#">Category</a> &gt;
                               <strong>Page</strong></p>
-                        <hr class="noscreen" />
                   </div>
                   <div id="content">
-                        hgfdscx
+
                   </div>
                   <div id="col" class="noprint">
                         <div id="col-in">

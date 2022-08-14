@@ -1,0 +1,42 @@
+.menu {
+    background: #7f000b;
+    margin: 0 5px;
+    padding: 10px 0 0 0;
+    ul {
+        margin: 0 10px;
+        padding: 0;
+        list-style: none;
+
+        li {
+            margin: 0 5px 0 0;
+            padding: 0;
+            float: left;
+
+            a {
+                display: block;
+                position: relative;
+                padding: 7px 15px;
+                border: 0;
+                background: url("../design/tab_link.gif") 0 0 repeat-x;
+                color: #ff99b2;
+                font-weight: bold;
+                text-decoration: none;
+                cursor: pointer;
+                border-top-left-radius: 8px;
+                border-top-right-radius: 8px;
+
+                &:hover {
+                    background: #FFF;
+                    color: #FF0000;
+                }
+            }
+        }
+
+        li.active {
+            a {
+                background: #FFF;
+                color: #FF0000;
+            }
+        }
+    }
+}

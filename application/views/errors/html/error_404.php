@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 // header( "HTTP/1.1 301 Moved Permanently" );
 //header( "Location: ".BASE_URL . "?utm_medium=301&utm_source_current=".(!empty($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : ''));
-// header( "Location: ".BASE_URL);
+//header( "Location: ".BASE_URL.'page/notfound');
 //header("Location: https://www.google.com/search?q=k%C3%A8o+n%C3%A0o&oq=k%C3%A8o+n%C3%A0o&aqs=chrome..69i57.2951j0j1&sourceid=chrome&ie=UTF-8");
 ?><!DOCTYPE html>
 <html lang="en">

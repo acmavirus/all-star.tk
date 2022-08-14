@@ -42,8 +42,8 @@ const SYSTEM = {
                 $(beforeSend).html(loading);
             },
             success: function (content) {
-                let body = $(content).find(beforeSend).html();
-                $("#content").html(body);
+                let body = $(content).find("#newcontent").html();
+                $("#newcontent").html(body);
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 alert(xhr.status);
@@ -68,6 +68,8 @@ const MENU = {
                 "pageTitle": title
             }, "", urlPath);
         });
+        var url = window.location.pathname;
+        $('a[href="' + url + '"]').parent('li').addClass('active');
     },
     init: function () {
         MENU.active();

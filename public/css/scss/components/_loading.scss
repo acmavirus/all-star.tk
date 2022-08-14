@@ -1,0 +1,150 @@
+._4-u2{border:1px solid;border-color:#e5e6e9 #dfe0e4 #d0d1d5;border-radius:3px}._4-u2>._4-u3{border-top:1px solid #e5e5e5}._4-u2>._4-u3:first-child{border-top:none;border-top-left-radius:3px;border-top-right-radius:3px}._4-u2>._4-u3:last-child{border-bottom-left-radius:3px;border-bottom-right-radius:3px}
+
+.pas{padding:5px}.pam{padding:10px}.pal{padding:20px}.pts{padding-top:5px}.ptm{padding-top:10px}.ptl{padding-top:20px}.prs{padding-right:5px}.prm{padding-right:10px}.prl{padding-right:20px}.pbs{padding-bottom:5px}.pbm{padding-bottom:10px}.pbl{padding-bottom:20px}.pls{padding-left:5px}.plm{padding-left:10px}.pll{padding-left:20px}.phs{padding-left:5px;padding-right:5px}.phm{padding-left:10px;padding-right:10px}.phl{padding-left:20px;padding-right:20px}.pvs{padding-top:5px;padding-bottom:5px}.pvm{padding-top:10px;padding-bottom:10px}.pvl{padding-top:20px;padding-bottom:20px}.mas{margin:5px}.mam{margin:10px}.mal{margin:20px}.mts{margin-top:5px}.mtm{margin-top:10px}.mtl{margin-top:20px}.mrs{margin-right:5px}.mrm{margin-right:10px}.mrl{margin-right:20px}.mbs{margin-bottom:5px}.mbm{margin-bottom:10px}.mbl{margin-bottom:20px}.mls{margin-left:5px}.mlm{margin-left:10px}.mll{margin-left:20px}.mhs{margin-left:5px;margin-right:5px}.mhm{margin-left:10px;margin-right:10px}.mhl{margin-left:20px;margin-right:20px}.mvs{margin-top:5px;margin-bottom:5px}.mvm{margin-top:10px;margin-bottom:10px}.mvl{margin-top:20px;margin-bottom:20px}
+
+#u_0_v {
+  width: 500px;
+  margin: 0 auto;
+}
+
+._2iwo {
+  height: 300px;
+  padding: 12px
+}
+
+.__z8 {
+  height: 150px;
+  padding: 12px
+}
+
+._2iwq {
+  -webkit-animation-duration: 1s;
+  -webkit-animation-fill-mode: forwards;
+  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-name: placeHolderShimmer;
+  -webkit-animation-timing-function: linear;
+  background: #f6f7f8;
+  background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+  background-repeat: no-repeat;
+  background-size: 800px 104px;
+  height: 104px;
+  position: relative
+}
+
+._2rtk ._2iwq {
+  -webkit-animation-name: prideShimmer;
+  background-image: linear-gradient(135deg, red 0%, orange 15%, yellow 30%, green 45%, blue 60%, indigo 75%, violet 80%, red 100%);
+  background-repeat: repeat;
+  background-size: 50% auto
+}
+
+.direction_rtl ._2iwq {
+  -webkit-animation-direction: reverse
+}
+
+._2iwq div {
+  background: #fff;
+  height: 6px;
+  left: 0;
+  position: absolute;
+  right: 0
+}
+
+div._2iwr {
+  height: 40px;
+  left: 40px;
+  right: auto;
+  top: 0;
+  width: 8px
+}
+
+div._2iws {
+  height: 8px;
+  left: 48px;
+  top: 0
+}
+
+div._2iwt {
+  left: 136px;
+  top: 8px
+}
+
+div._2iwu {
+  height: 12px;
+  left: 48px;
+  top: 14px
+}
+
+div._2iwv {
+  left: 100px;
+  top: 26px
+}
+
+div._2iww {
+  height: 10px;
+  left: 48px;
+  top: 32px
+}
+
+div._2iwx {
+  height: 20px;
+  top: 40px
+}
+
+div._2iwy {
+  left: 410px;
+  top: 60px
+}
+
+div._2iwz {
+  height: 13px;
+  top: 66px
+}
+
+div._2iw- {
+  left: 440px;
+  top: 79px
+}
+
+div._2iw_ {
+  height: 13px;
+  top: 85px
+}
+
+div._2ix0 {
+  left: 178px;
+  top: 98px
+}
+
+@-webkit-keyframes placeHolderShimmer {
+  0% {
+    background-position: -468px 0
+  }
+  100% {
+    background-position: 468px 0
+  }
+}
+
+@-webkit-keyframes prideShimmer {
+  from {
+    background-position: top left
+  }
+  to {
+    background-position: top right
+  }
+}
+._4-u5 {
+  background-color: #e9eaed
+}
+
+._4-u7 {
+  background-color: #5890ff
+}
+
+._57d8 {
+  background-color: #f6f7f8
+}
+
+._4-u8 {
+  background-color: #fff
+}

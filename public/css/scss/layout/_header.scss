@@ -1,10 +1,15 @@
+header {
+    background-color: rgba(238, 227, 228, 0.7);
+}
+
 #header {
     position: relative;
-    width: 770px;
     height: 100px;
     margin: 0;
     padding: 0;
-    background: #233C9B url("../design/header.jpg") 0 0 no-repeat;
+    background-image: url(../design/header.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
     color: #FFF;
 
     #logo {

@@ -11,7 +11,7 @@
   <script>
     let base_url = '<?= base_url(); ?>';
   </script>
-  <div id="main" class="box">
+  <div class="container">
     <?php $this->load->view(TEMPLATE_PATH. "_header"); ?>
     <?= !empty($main_content) ? $main_content : '' ?>
     <?php $this->load->view(TEMPLATE_PATH. "_footer"); ?>

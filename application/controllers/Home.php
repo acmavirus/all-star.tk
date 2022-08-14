@@ -17,6 +17,12 @@ class Home extends Public_Controller
     public function index()
     {
         $data = [];
+        $params = [
+            'page' => 1,
+            'limit'=> 18
+        ];
+        $data['data'] = $this->_post->getData($params);
+        $data['breadcrumb'] = $this->breadcrumbs->show();
         $data['main_content'] = $this->load->view(TEMPLATE_PATH . 'home/index', $data, TRUE);
         $this->load->view(TEMPLATE_MAIN, $data);
     }
